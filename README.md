@@ -1,66 +1,72 @@
-# 🚨 SafeShe – AI-Powered Women Safety & Harassment Reporting Platform
+# Getting Started with Create React App
 
-SafeShe is a full-stack, AI-powered women safety platform designed to help users report harassment incidents, trigger SOS alerts, and visualize unsafe areas using heatmaps.
-The platform also provides **police/admin dashboards** for analytics and prioritization of high-risk cases.
+[![CI](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml)
 
-This project was built focusing on real-world impact, scalability, and clear system design.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
----
+## Available Scripts
 
-## 🌟 Key Features
+In the project directory, you can run:
 
-### 👩‍💻 User Features
+### `npm start`
 
-* 🔐 Secure authentication using JWT
-* 📝 Harassment reporting with title, description & location
-* 🧠 AI-based incident classification & risk scoring
-* 📋 View personal reports with risk level
-* 🚨 Panic / SOS button for emergencies
-* 🎙️ Voice-activated SOS (keyword-based demo)
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-### 🧠 AI & Intelligence
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-* Rule-based NLP classifier for incident categorization
-* Automatic **risk score assignment** (severity-based)
-* Designed for future ML model upgrades
+### `npm test`
 
-### 🗺️ Visualization
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-* 🔥 Heatmap showing unsafe zones
-* Risk-weighted location clustering
-* Google Maps integration
+### `npm run build`
 
-### 👮 Police / Admin Features
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-* 🚓 Police dashboard to view all reports
-* 📊 Admin analytics (incident trends & severity)
-* Prioritization of high-risk cases
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
----
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## 🛠️ Tech Stack
+### `npm run eject`
 
-### Frontend
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-* React.js
-* JavaScript (ES6)
-* Google Maps API
-* Recharts (Analytics)
-* CSS / Tailwind (optional)
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-### Backend
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-* Node.js
-* Express.js
-* MongoDB & Mongoose
-* JWT Authentication
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-### AI / Logic
+## Learn More
 
-* Rule-based NLP classification
-* Risk scoring engine
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-### Tools
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-* Git & GitHub
-* Postman
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
