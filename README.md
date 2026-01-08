@@ -2,8 +2,6 @@
 
 A full-stack web app for women to report harassment incidents with AI-powered risk scoring, geolocation sharing, and SOS alerts.
 
-**Live Demo:** Deploy to GitHub Pages (frontend) + Heroku (backend) using the included GitHub Actions workflows.
-
 ## Quick Start (Local)
 
 ### Prerequisites
