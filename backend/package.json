@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "smoke": "node scripts/smokeTest.js",
+    "test": "jest --runInBand --detectOpenHandles"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "jest": "^29.6.1",
+    "supertest": "^6.3.3",
+    "mongodb-memory-server": "^8.13.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.2"
+  }
+}
