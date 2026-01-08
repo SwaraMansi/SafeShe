@@ -3,7 +3,7 @@
 SafeShe is a full-stack, AI-powered women safety platform designed to help users report harassment incidents, trigger SOS alerts, and visualize unsafe areas using heatmaps.
 The platform also provides **police/admin dashboards** for analytics and prioritization of high-risk cases.
 
-This project was built with a **hackathon-first mindset**, focusing on real-world impact, scalability, and clear system design.
+This project was built focusing on real-world impact, scalability, and clear system design.
 
 ---
 
