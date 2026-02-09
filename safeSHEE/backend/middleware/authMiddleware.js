@@ -1,0 +1,25 @@
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: 'Missing authorization header' });
+
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2) return res.status(401).json({ message: 'Invalid authorization header' });
+
+  const token = parts[1];
+  jwt.verify(token, SECRET, (err, decoded) => {
+    if (err) return res.status(401).json({ message: 'Invalid token' });
+    req.user = decoded;
+    next();
+  });
+}
+
+function adminOnly(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
+  next();
+}
+
+module.exports = { authMiddleware, adminOnly };
