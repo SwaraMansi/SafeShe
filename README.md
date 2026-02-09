@@ -1,4 +1,4 @@
-# 🚨 safeSHEE – AI-Powered Women Safety & Incident Management Platform
+# SafeShe – AI-Powered Women Safety & Incident Management Platform
 
 ## 🌍 Overview
 
