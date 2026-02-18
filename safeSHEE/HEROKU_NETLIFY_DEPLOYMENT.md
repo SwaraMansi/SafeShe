@@ -1,4 +1,8 @@
-# SafeSHEE Heroku + Netlify Deployment Guide
+# Windows
+.\deploy-prepare.ps1
+
+# macOS/Linux
+bash deploy-prepare.sh# SafeSHEE Heroku + Netlify Deployment Guide
 
 ## Overview
 This guide covers deploying the safeSHEE application:
@@ -425,14 +429,11 @@ heroku logs --app your-safeshee-backend --tail --source app --dyno web
 ### Free Tier
 - **Heroku**: 5 free dynos (may require credit card)
 - **Netlify**: Free hosting + auto-deployments
-- **PostgreSQL**: Hobby Dev (5MB limit, free)
-- **Total**: ~$0/month (if using free tier)
+
 
 ### Recommended (Production)
 - **Heroku**: Standard-1X dyno (~$7/month)
 - **Netlify**: Pro plan (~$19/month) - optional
-- **PostgreSQL**: Standard 0 (~$50/month)
-- **Total**: ~$70-80/month minimum
 
 ---
 

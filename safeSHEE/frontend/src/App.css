@@ -12,11 +12,17 @@ body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:
 .nav-right a{color:var(--muted);margin-right:10px;text-decoration:none}
 .nav-right .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;color:var(--muted);margin-left:8px}
 .app-main{padding:16px}
-.auth-card{max-width:420px;margin:28px auto;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:8px}
-.auth-card h2{margin-top:0}
-label{display:block;margin-top:8px;color:var(--muted);font-size:13px}
-input{width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:inherit}
-.btn-primary{background:var(--red);color:white;border:0;padding:10px 12px;margin-top:12px;border-radius:8px;width:100%;font-weight:600}
+.auth-card{max-width:480px;margin:28px auto;padding:40px;background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));border-radius:12px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.auth-card h2{margin-top:0;font-size:28px;color:#fff;margin-bottom:8px}
+.auth-card p{color:rgba(255,255,255,0.7);margin-bottom:20px}
+.auth-card a{color:var(--red);text-decoration:none;font-weight:600}
+.auth-card a:hover{text-decoration:underline}
+label{display:block;margin-top:14px;color:rgba(255,255,255,0.8);font-size:14px;font-weight:500}
+input, select{width:100%;padding:12px;margin-top:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:inherit;font-size:14px;transition:all 0.3s}
+input:focus, select:focus{outline:none;border-color:var(--red);background:rgba(255,255,255,0.08);box-shadow:0 0 0 3px rgba(176,0,32,0.1)}
+.btn-primary{background:linear-gradient(135deg, var(--red), #c20033);color:white;border:0;padding:12px;margin-top:20px;border-radius:8px;width:100%;font-weight:600;font-size:16px;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 15px rgba(176,0,32,0.3)}
+.btn-primary:hover:not(:disabled){background:linear-gradient(135deg, #a01d4a, #b01c38);transform:translateY(-2px);box-shadow:0 6px 20px rgba(176,0,32,0.4)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed}
 .btn-secondary{background:#222;color:#fff;border:0;padding:8px 10px;border-radius:6px}
 .dashboard{display:flex;flex-direction:column;gap:12px}
 .panel{background:var(--card);padding:12px;border-radius:8px}
@@ -68,6 +74,7 @@ input{width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid 
 
 /* error and loading states */
 .error-banner{background:rgba(255,77,79,0.12);color:#ff4d4f;padding:10px;border-radius:6px;margin-bottom:12px}
+.error-message{background:rgba(255,77,79,0.15);color:#ff4d4f;padding:12px;border-radius:6px;margin-bottom:16px;border-left:4px solid #ff4d4f;font-size:14px}
 .placeholder-card{border:2px dashed rgba(255,255,255,0.05);padding:20px;border-radius:8px;color:var(--muted)}
 
 /* WebSocket status indicator */

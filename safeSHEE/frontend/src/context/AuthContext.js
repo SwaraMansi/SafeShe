@@ -11,7 +11,10 @@ export function AuthProvider({ children }){
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE = 'http://localhost:5000';
+  // Dynamically detect API base URL
+  const API_BASE = process.env.REACT_APP_API || window.location.hostname === 'localhost' 
+    ? `http://localhost:5000`
+    : (process.env.REACT_APP_API || 'https://backend.herokuapp.com');
 
   useEffect(()=>{
     if (user) localStorage.setItem('safeshee_user', JSON.stringify(user)); else localStorage.removeItem('safeshee_user');

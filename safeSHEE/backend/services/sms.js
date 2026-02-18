@@ -18,10 +18,16 @@ let twilioClient = null;
 const USE_TWILIO = twilio && TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE;
 
 if (USE_TWILIO) {
-  twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-  console.log('✅ Twilio SMS service initialized');
+  try {
+    twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    console.log('✅ Twilio SMS service initialized');
+  } catch (err) {
+    console.log('⚠️  Twilio initialization failed:', err.message);
+    console.log('📱 Using mock SMS service for development');
+    twilioClient = null;
+  }
 } else {
-  console.log('📱 Using mock SMS service for development');
+  console.log('📱 Using mock SMS service for development (no valid Twilio credentials)');
 }
 
 // Mock SMS log (for testing without Twilio)

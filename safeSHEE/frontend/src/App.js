@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
@@ -89,7 +90,7 @@ function AppContent() {
     <div className="app-root">
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<Navigate to={user ? "/user" : "/login"} replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/user" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />

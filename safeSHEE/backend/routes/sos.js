@@ -30,13 +30,28 @@ router.post('/', authMiddleware, (req, res) => {
       status: 'active'
     };
 
-    // Broadcast to all WebSocket clients using global wsManager
+    // Notify primary contact via SMS (detailed alert and 'help' message)
+    const primaryContact = req.user.primaryContact; // Assuming primary contact is stored in user object
+    const detailedMessage = `Emergency Alert! ${req.user.name} has triggered an SOS. Location: (${latitude}, ${longitude}).`;
+    const helpMessage = 'help';
+
+    if (primaryContact) {
+      // Send detailed alert
+      smsService.sendSMS(primaryContact, detailedMessage)
+        .then(() => console.log(`📩 Detailed SMS sent to primary contact: ${primaryContact}`))
+        .catch(err => console.error(`⚠️ Failed to send detailed SMS: ${err.message}`));
+      // Send simple 'help' message
+      smsService.sendSMS(primaryContact, helpMessage)
+        .then(() => console.log(`📩 'help' SMS sent to primary contact: ${primaryContact}`))
+        .catch(err => console.error(`⚠️ Failed to send 'help' SMS: ${err.message}`));
+    } else {
+      console.warn('⚠️ No primary contact found for user');
+    }
+
     if (global.wsManager) {
       global.wsManager.broadcastNewAlert(alert);
     }
 
-    // Send SMS to emergency contacts (if phone numbers available)
-    // In a real scenario, would fetch from CONTACTS table
     console.log(`🚨 SOS Alert #${alertId} created for ${req.user.name}`);
 
     res.status(201).json({ message: 'SOS created', alertId, alert });
@@ -44,7 +59,6 @@ router.post('/', authMiddleware, (req, res) => {
   stmt.finalize();
 });
 
-// Update location for an active alert
 router.post('/update', authMiddleware, (req, res) => {
   const { alertId, latitude, longitude, timestamp } = req.body;
   if (!alertId || latitude == null || longitude == null) return res.status(400).json({ message: 'Missing data' });

@@ -8,6 +8,32 @@ function LiveMap({ positions = [], alerts = [], unsafeZones = [] }){
   const userMarkerRef = useRef(null);
   const alertsLayerRef = useRef(null);
 
+  // Show browser notification for high-risk alert
+  useEffect(() => {
+    if (alerts && alerts.length) {
+      const highRisk = alerts.find(a => a.risk && a.risk > 70);
+      if (highRisk) {
+        if (window.Notification && Notification.permission === 'granted') {
+          new Notification('Red Zone Alert', {
+            body: 'You have entered a high-risk (red zone) area! Stay alert.',
+            icon: '/favicon.ico'
+          });
+        } else if (window.Notification && Notification.permission !== 'denied') {
+          Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+              new Notification('Red Zone Alert', {
+                body: 'You have entered a high-risk (red zone) area! Stay alert.',
+                icon: '/favicon.ico'
+              });
+            }
+          });
+        } else {
+          alert('Red Zone Alert: You have entered a high-risk area! Stay alert.');
+        }
+      }
+    }
+  }, [alerts]);
+
   useEffect(()=>{
     if (!mapRef.current){
       mapRef.current = L.map('map', { preferCanvas:true }).setView([20,0], 2);

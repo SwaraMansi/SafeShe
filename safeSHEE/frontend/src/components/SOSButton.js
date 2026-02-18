@@ -14,6 +14,30 @@ function SOSButton({ onActivate, onDeactivate, onPosition }){
 
   function start(){
     if (!navigator.geolocation) return alert('Geolocation not supported');
+
+    // Trigger backend SOS API
+    fetch('/sos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+      },
+      body: JSON.stringify({
+        latitude: null, // Placeholder, will be updated with geolocation
+        longitude: null, // Placeholder, will be updated with geolocation
+        timestamp: Date.now()
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.alertId) {
+        console.log(`🚨 SOS Alert created with ID: ${data.alertId}`);
+      } else {
+        console.error('⚠️ Failed to create SOS alert:', data);
+      }
+    })
+    .catch(err => console.error('⚠️ Error triggering SOS API:', err));
+
     // get immediate position
     navigator.geolocation.getCurrentPosition((pos)=>{
       const p = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, timestamp: pos.timestamp };
