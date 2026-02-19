@@ -1,69 +1,60 @@
-/**
- * ML-Based Risk Prediction Model
- * Implements logistic regression with features for incident risk scoring
- */
-
 const db = require('../database');
 
 class MLRiskModel {
   constructor() {
     this.weights = {};
-    this.bias = 0;
-    this.learningRate = 0.01;
     this.initialized = false;
     this.initializeDefaultWeights();
   }
 
-  /**
-   * Initialize default weights based on historical patterns
-   */
   initializeDefaultWeights() {
     this.weights = {
-      // Category features (most important)
-      'domestic_violence': 0.85,
-      'assault': 0.82,
-      'stalking': 0.75,
-      'threat': 0.65,
-      'harassment': 0.55,
-      'suspicious_activity': 0.35,
-      'other': 0.20,
-
-      // Time features
-      'late_night': 0.70,      // 10 PM - 5 AM
-      'early_morning': 0.45,   // 5 AM - 8 AM
-      'evening': 0.55,         // 6 PM - 10 PM
-      'daytime': 0.30,         // 8 AM - 6 PM
-
-      // Day of week
-      'weekend': 0.50,
-      'weekday': 0.35,
-
-      // Area/Location density
-      'high_density_area': 0.60,  // >10 incidents in 30 days
-      'medium_density_area': 0.40, // 5-10 incidents
-      'low_density_area': 0.20,   // <5 incidents
-
-      // Time unresolved
-      'time_unresolved': 0.008,   // +0.8 per hour
-
-      // Repeat incidents
-      'repeat_offender_area': 0.50, // Same area within 30 days
+      category: {
+        'domestic_violence': 0.95,
+        'assault': 0.90,
+        'stalking': 0.85,
+        'threat': 0.70,
+        'harassment': 0.60,
+        'suspicious_activity': 0.40,
+        'other': 0.20
+      },
+      timeOfDay: {
+        'late_night': 0.80,
+        'early_morning': 0.50,
+        'evening': 0.65,
+        'daytime': 0.35
+      },
+      dayOfWeek: {
+        'weekend': 0.55,
+        'weekday': 0.45
+      },
+      areaDensity: {
+        'high_density': 0.70,
+        'medium_density': 0.50,
+        'low_density': 0.30
+      },
+      description: {
+        critical: ['severe', 'blood', 'weapon', 'death', 'fatal', 'emergency', 'immediate'],
+        high: ['hurt', 'injur', 'attack', 'force', 'threat', 'violent', 'danger'],
+        medium: ['afraid', 'scared', 'unsafe', 'concern', 'suspicious', 'strange']
+      }
     };
 
-    this.bias = 0.3; // Default baseline confidence
+    this.featureWeights = {
+      category: 0.35,
+      timeOfDay: 0.20,
+      dayOfWeek: 0.10,
+      areaDensity: 0.15,
+      description: 0.10,
+      areaHistory: 0.10
+    };
+
     this.initialized = true;
   }
 
-  /**
-   * Sigmoid activation function for probability output
-   */
-  sigmoid(z) {
-    return 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, z))));
+  normalizeScore(score) {
+    return Math.min(100, Math.max(0, score));
   }
-
-  /**
-   * Extract features from report and context
-   */
   extractFeatures(reportData, areaData) {
     const features = {};
     const timestamp = reportData.timestamp || Date.now();
@@ -71,46 +62,87 @@ class MLRiskModel {
     const hour = date.getHours();
     const dayOfWeek = date.getDay();
 
-    // 1. Category features
-    const categoryLower = (reportData.type || '').toLowerCase().replace(/\s+/g, '_');
-    features['category'] = categoryLower;
+    const categoryLower = (reportData.type || '').toLowerCase();
+    features.category = this.weights.category[categoryLower] !== undefined 
+      ? categoryLower 
+      : 'other';
 
-    // 2. Time features
     if (hour >= 22 || hour < 5) {
-      features['time'] = 'late_night';
+      features.timeOfDay = 'late_night';
     } else if (hour >= 5 && hour < 8) {
-      features['time'] = 'early_morning';
+      features.timeOfDay = 'early_morning';
     } else if (hour >= 18 && hour < 22) {
-      features['time'] = 'evening';
+      features.timeOfDay = 'evening';
     } else {
-      features['time'] = 'daytime';
+      features.timeOfDay = 'daytime';
     }
 
-    // 3. Day of week (weekend = Sat/Sun)
-    features['day_type'] = (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend' : 'weekday';
+    features.dayOfWeek = (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend' : 'weekday';
 
-    // 4. Area density
-    features['area_density'] = areaData.recentIncidents || 0;
-    if (areaData.recentIncidents >= 10) {
-      features['density_level'] = 'high_density_area';
-    } else if (areaData.recentIncidents >= 5) {
-      features['density_level'] = 'medium_density_area';
+    const recentIncidents = areaData.recentIncidents || 0;
+    if (recentIncidents >= 10) {
+      features.areaDensity = 'high_density';
+    } else if (recentIncidents >= 5) {
+      features.areaDensity = 'medium_density';
     } else {
-      features['density_level'] = 'low_density_area';
+      features.areaDensity = 'low_density';
     }
 
-    // 5. Time unresolved (in hours)
-    features['time_unresolved_hours'] = areaData.avgTimeUnresolvedHours || 0;
+    features.areaDataSummary = {
+      recentIncidents,
+      avgTimeUnresolvedHours: areaData.avgTimeUnresolvedHours || 0,
+      hasRecentIncidents: areaData.hasRecentIncidents || false
+    };
 
-    // 6. Repeat incidents in area
-    features['repeat_incidents'] = areaData.hasRecentIncidents ? 1 : 0;
+    features.description = reportData.description || '';
 
     return features;
   }
+  calculateDescriptionSeverity(description) {
+    const text = (description || '').toLowerCase();
+    
+    let severityScore = 0;
+    
+    const criticalKeywords = this.weights.description.critical;
+    const highKeywords = this.weights.description.high;
+    const mediumKeywords = this.weights.description.medium;
 
-  /**
-   * Calculate area data from database
-   */
+    criticalKeywords.forEach(keyword => {
+      if (text.includes(keyword)) severityScore = Math.max(severityScore, 0.90);
+    });
+
+    if (severityScore < 0.90) {
+      highKeywords.forEach(keyword => {
+        if (text.includes(keyword)) severityScore = Math.max(severityScore, 0.65);
+      });
+    }
+
+    if (severityScore < 0.65) {
+      mediumKeywords.forEach(keyword => {
+        if (text.includes(keyword)) severityScore = Math.max(severityScore, 0.40);
+      });
+    }
+
+    return severityScore || 0.20;
+  }
+
+  calculateAreaHistoryBoost(areaData) {
+    const { recentIncidents, avgTimeUnresolvedHours, hasRecentIncidents } = areaData;
+    
+    let boost = 0;
+
+    if (recentIncidents >= 15) boost += 0.15;
+    else if (recentIncidents >= 10) boost += 0.10;
+    else if (recentIncidents >= 5) boost += 0.05;
+
+    if (avgTimeUnresolvedHours > 24) boost += 0.10;
+    else if (avgTimeUnresolvedHours > 12) boost += 0.05;
+
+    if (hasRecentIncidents && recentIncidents >= 3) boost += 0.05;
+
+    return Math.min(0.25, boost);
+  }
+
   async getAreaData(latitude, longitude) {
     return new Promise((resolve) => {
       if (!latitude || !longitude) {
@@ -121,8 +153,6 @@ class MLRiskModel {
         });
         return;
       }
-
-      // Get incidents within 5km radius in last 30 days
       const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
       db.all(
         `SELECT id, timestamp, status FROM reports 
@@ -138,14 +168,10 @@ class MLRiskModel {
             });
             return;
           }
-
-          // Simple distance calculation (Haversine approximation)
           const incidentsNearby = rows.filter(row => {
             const distance = this.calculateDistance(latitude, longitude, row.latitude, row.longitude);
-            return distance < 5; // 5km radius
+            return distance < 5; 
           });
-
-          // Calculate average time unresolved for pending/investigating
           let totalHours = 0;
           const pendingIncidents = incidentsNearby.filter(r => r.status !== 'resolved');
           if (pendingIncidents.length > 0) {
@@ -154,7 +180,6 @@ class MLRiskModel {
               return sum + hours;
             }, 0) / pendingIncidents.length;
           }
-
           resolve({
             recentIncidents: incidentsNearby.length,
             avgTimeUnresolvedHours: totalHours,
@@ -164,12 +189,8 @@ class MLRiskModel {
       );
     });
   }
-
-  /**
-   * Haversine distance formula (simplified for small areas)
-   */
   calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth's radius in km
+    const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -178,157 +199,183 @@ class MLRiskModel {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
-
-  /**
-   * Predict risk score and confidence for a report
-   */
   async predictRisk(reportData) {
     try {
-      // Extract base features
       const areaData = await this.getAreaData(reportData.latitude, reportData.longitude);
       const features = this.extractFeatures(reportData, areaData);
 
-      // Calculate prediction score
-      let score = this.bias;
+      const categoryScore = this.weights.category[features.category] || this.weights.category['other'];
+      const timeScore = this.weights.timeOfDay[features.timeOfDay];
+      const dayScore = this.weights.dayOfWeek[features.dayOfWeek];
+      const areaScore = this.weights.areaDensity[features.areaDensity];
+      const descriptionScore = this.calculateDescriptionSeverity(features.description);
+      const areaHistoryBoost = this.calculateAreaHistoryBoost(areaData);
 
-      // Add category weight
-      const categoryWeight = this.weights[features.category] || this.weights['other'];
-      score += categoryWeight * 0.35;
+      const riskScore = Math.round(
+        (categoryScore * this.featureWeights.category) +
+        (timeScore * this.featureWeights.timeOfDay) +
+        (dayScore * this.featureWeights.dayOfWeek) +
+        (areaScore * this.featureWeights.areaDensity) +
+        (descriptionScore * this.featureWeights.description) +
+        (areaHistoryBoost * this.featureWeights.areaHistory)
+      ) * 100;
 
-      // Add time weight
-      const timeWeight = this.weights[features.time] || this.weights['daytime'];
-      score += timeWeight * 0.25;
+      const normalizedScore = this.normalizeScore(riskScore);
 
-      // Add day type weight
-      const dayWeight = this.weights[features.day_type] || 0.35;
-      score += dayWeight * 0.10;
+      const confidence = this.calculateConfidence(
+        categoryScore,
+        descriptionScore,
+        areaData.recentIncidents
+      );
 
-      // Add area density weight
-      const densityWeight = this.weights[features.density_level] || this.weights['low_density_area'];
-      score += densityWeight * 0.15;
-
-      // Add time unresolved factor (affects pending reports)
-      score += features.time_unresolved_hours * this.weights['time_unresolved'];
-
-      // Add repeat incidents factor
-      if (features.repeat_incidents) {
-        score += this.weights['repeat_offender_area'] * 0.10;
-      }
-
-      // Apply sigmoid to get probability (0-1)
-      const probability = this.sigmoid(score * 2); // Scale for better distribution
-      const confidence = Math.min(0.99, this.bias + (probability * 0.8)); // Confidence 0-1
-      const riskScore = Math.round(probability * 100); // Convert to 0-100 scale
+      const explanation = this.generateExplanation(
+        features,
+        normalizedScore,
+        {
+          categoryScore,
+          timeScore,
+          dayScore,
+          areaScore,
+          descriptionScore,
+          areaHistoryBoost
+        }
+      );
 
       return {
-        predicted_risk_score: riskScore,
-        ai_confidence: parseFloat(confidence.toFixed(2)),
+        predicted_risk_score: normalizedScore,
+        ai_confidence: confidence,
         features: features,
-        explanation: this.generateExplanation(features, riskScore)
+        explanation: explanation,
+        scoreBreakdown: {
+          category: Math.round(categoryScore * 100),
+          timeOfDay: Math.round(timeScore * 100),
+          dayOfWeek: Math.round(dayScore * 100),
+          areaDensity: Math.round(areaScore * 100),
+          description: Math.round(descriptionScore * 100),
+          areaHistory: Math.round(areaHistoryBoost * 100)
+        }
       };
     } catch (error) {
-      console.error('ML Prediction error:', error);
+      console.error('Risk prediction error:', error);
       return {
-        predicted_risk_score: 50,
-        ai_confidence: 0.3,
+        predicted_risk_score: 45,
+        ai_confidence: 0.25,
         features: {},
-        explanation: 'Default prediction due to error'
+        explanation: 'Unable to calculate precise risk - using baseline assessment',
+        scoreBreakdown: {}
       };
     }
   }
 
-  /**
-   * Generate human-readable explanation of risk factors
-   */
-  generateExplanation(features, riskScore) {
-    const factors = [];
+  calculateConfidence(categoryScore, descriptionScore, recentIncidents) {
+    let confidence = 0.50;
 
-    // Category explanation
-    const categoryMap = {
-      'domestic_violence': 'Domestic violence category (high severity)',
-      'assault': 'Assault report (high severity)',
+    if (categoryScore > 0.85) confidence += 0.15;
+    else if (categoryScore > 0.70) confidence += 0.10;
+    else if (categoryScore > 0.50) confidence += 0.05;
+
+    if (descriptionScore > 0.70) confidence += 0.15;
+    else if (descriptionScore > 0.50) confidence += 0.08;
+
+    if (recentIncidents > 10) confidence += 0.10;
+    else if (recentIncidents > 5) confidence += 0.05;
+
+    return parseFloat(Math.min(0.99, confidence).toFixed(2));
+  }
+  generateExplanation(features, riskScore, scores) {
+    const factors = [];
+    const riskLevel = this.getRiskLevel(riskScore);
+
+    const categoryDescriptions = {
+      'domestic_violence': 'Domestic violence (critical severity)',
+      'assault': 'Assault report (critical severity)',
       'stalking': 'Stalking incident (high severity)',
-      'threat': 'Threat report (medium-high severity)',
+      'threat': 'Threat report (high severity)',
       'harassment': 'Harassment incident (medium severity)',
-      'suspicious_activity': 'Suspicious activity (low-medium)',
+      'suspicious_activity': 'Suspicious activity (low-medium severity)',
       'other': 'Other incident type'
     };
-    if (categoryMap[features.category]) {
-      factors.push(categoryMap[features.category]);
+
+    if (categoryDescriptions[features.category]) {
+      const categoryScore = Math.round(scores.categoryScore * 100);
+      factors.push(`Category: ${categoryDescriptions[features.category]} (${categoryScore}%)`);
     }
 
-    // Time explanation
-    if (features.time === 'late_night') {
-      factors.push('Incident during late night hours (higher risk period)');
-    } else if (features.time === 'evening') {
-      factors.push('Incident during evening (elevated risk period)');
+    if (scores.descriptionScore > 0.50) {
+      const descScore = Math.round(scores.descriptionScore * 100);
+      const severity = scores.descriptionScore > 0.80 ? 'critical' : scores.descriptionScore > 0.65 ? 'severe' : 'notable';
+      factors.push(`Description indicates ${severity} language (${descScore}%)`);
     }
 
-    // Area density explanation
-    if (features.density_level === 'high_density_area') {
-      factors.push(`High incident density area (${features.area_density} recent incidents)`);
-    } else if (features.density_level === 'medium_density_area') {
-      factors.push(`Moderate incident density area (${features.area_density} recent incidents)`);
+    if (features.timeOfDay === 'late_night' || features.timeOfDay === 'evening') {
+      const timeScore = Math.round(scores.timeScore * 100);
+      factors.push(`High-risk time period: ${features.timeOfDay} (${timeScore}%)`);
     }
 
-    // Repeat incidents
-    if (features.repeat_incidents) {
-      factors.push('Repeat incident location (area of concern)');
+    const { recentIncidents, avgTimeUnresolvedHours } = features.areaDataSummary;
+    if (recentIncidents > 0) {
+      const areaScore = Math.round(scores.areaDensity * 100);
+      factors.push(`Area density: ${recentIncidents} recent incidents (${areaScore}%)`);
     }
 
-    // Time unresolved
-    if (features.time_unresolved_hours > 2) {
-      factors.push(`${features.time_unresolved_hours.toFixed(1)} hours unresolved (escalating)`);
+    if (scores.areaHistoryBoost > 0) {
+      const boostPercent = Math.round(scores.areaHistoryBoost * 100);
+      factors.push(`Area has history of unresolved cases - boosting score ${boostPercent}%`);
     }
 
-    const priority = riskScore > 85 ? 'CRITICAL' : riskScore > 70 ? 'HIGH' : riskScore > 40 ? 'MEDIUM' : 'LOW';
+    if (avgTimeUnresolvedHours > 0 && avgTimeUnresolvedHours > 12) {
+      factors.push(`Area average resolution time: ${avgTimeUnresolvedHours.toFixed(1)} hours`);
+    }
 
-    return `${priority} risk: ${factors.join('; ')}`;
+    const explanation = factors.length > 0 
+      ? `${riskLevel}: ${factors.join(' | ')}`
+      : `${riskLevel}: No specific risk factors identified`;
+
+    return explanation;
   }
 
-  /**
-   * Update model weights based on resolved cases (continuous learning)
-   */
+  getRiskLevel(score) {
+    if (score >= 85) return '🔴 CRITICAL RISK';
+    if (score >= 70) return '🟠 HIGH RISK';
+    if (score >= 50) return '🟡 MEDIUM RISK';
+    if (score >= 30) return '🟢 LOW RISK';
+    return '✅ MINIMAL RISK';
+  }
   updateWeights(caseData) {
-    // Simple weight update: if case was resolved quickly, lower category weight slightly
-    // If it took long, increase category weight
-    if (caseData.resolution_time_hours) {
-      const timeRatio = caseData.resolution_time_hours / 24; // Normalized to days
-      const factor = timeRatio > 1 ? 1.05 : 0.98; // Increase or decrease
+    if (!caseData.type) return;
 
-      if (caseData.type) {
-        const categoryKey = caseData.type.toLowerCase().replace(/\s+/g, '_');
-        if (this.weights[categoryKey]) {
-          this.weights[categoryKey] *= factor;
-          this.weights[categoryKey] = Math.min(0.99, Math.max(0.1, this.weights[categoryKey]));
-        }
-      }
+    const categoryKey = caseData.type.toLowerCase();
+    if (this.weights.category[categoryKey] === undefined) return;
+
+    const maxResolutionHours = 72;
+    const resolutionFactor = Math.min(1.0, (caseData.resolution_time_hours || 48) / maxResolutionHours);
+
+    if (resolutionFactor > 0.7) {
+      this.weights.category[categoryKey] *= 1.02;
+    } else if (resolutionFactor < 0.3) {
+      this.weights.category[categoryKey] *= 0.98;
     }
 
-    // Store updated weights in database
+    this.weights.category[categoryKey] = Math.min(0.99, Math.max(0.15, this.weights.category[categoryKey]));
+
     this.storeWeights();
   }
 
-  /**
-   * Store weights in database for persistence
-   */
   storeWeights() {
     const now = Date.now();
-    Object.entries(this.weights).forEach(([feature, weight]) => {
+
+    Object.entries(this.weights.category).forEach(([featName, weight]) => {
       db.run(
         `INSERT OR REPLACE INTO model_weights (feature_name, weight, last_updated, confidence)
          VALUES (?, ?, ?, ?)`,
-        [feature, weight, now, 0.7],
+        [`category_${featName}`, weight, now, 0.8],
         (err) => {
-          if (err) console.error(`Failed to store weight for ${feature}:`, err.message);
+          if (err) console.error(`Failed to store category weight for ${featName}:`, err.message);
         }
       );
     });
   }
 
-  /**
-   * Load weights from database
-   */
   loadWeights() {
     return new Promise((resolve) => {
       db.all('SELECT feature_name, weight FROM model_weights', (err, rows) => {
@@ -336,9 +383,16 @@ class MLRiskModel {
           resolve();
           return;
         }
+
         rows.forEach(row => {
-          this.weights[row.feature_name] = row.weight;
+          if (row.feature_name.startsWith('category_')) {
+            const categoryName = row.feature_name.replace('category_', '');
+            if (this.weights.category[categoryName] !== undefined) {
+              this.weights.category[categoryName] = row.weight;
+            }
+          }
         });
+
         console.log('✅ ML Model weights loaded from database');
         resolve();
       });
@@ -346,5 +400,4 @@ class MLRiskModel {
   }
 }
 
-// Export singleton instance
 module.exports = new MLRiskModel();

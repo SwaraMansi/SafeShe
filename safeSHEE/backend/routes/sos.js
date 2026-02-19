@@ -4,7 +4,6 @@ const db = require('../database');
 const { authMiddleware, adminOnly } = require('../middleware/authMiddleware');
 const smsService = require('../services/sms');
 
-// Create new SOS alert
 router.post('/', authMiddleware, (req, res) => {
   const { latitude, longitude, timestamp } = req.body;
   const user_id = req.user.id;
@@ -18,7 +17,7 @@ router.post('/', authMiddleware, (req, res) => {
     const locStmt = db.prepare('INSERT INTO sos_locations (alert_id, latitude, longitude, timestamp) VALUES (?,?,?,?)');
     locStmt.run(alertId, latitude, longitude, ts, () => locStmt.finalize());
     
-    // Prepare alert object for WebSocket broadcast
+
     const alert = {
       id: alertId,
       user_id: user_id,
@@ -30,23 +29,29 @@ router.post('/', authMiddleware, (req, res) => {
       status: 'active'
     };
 
-    // Notify primary contact via SMS (detailed alert and 'help' message)
-    const primaryContact = req.user.primaryContact; // Assuming primary contact is stored in user object
-    const detailedMessage = `Emergency Alert! ${req.user.name} has triggered an SOS. Location: (${latitude}, ${longitude}).`;
-    const helpMessage = 'help';
+    // Query database to get primary contact
+    db.get('SELECT phone FROM emergency_contacts WHERE user_id = ? AND is_primary = 1', [user_id], (err, contact) => {
+      if (err) {
+        console.error('Error fetching primary contact:', err.message);
+        return;
+      }
 
-    if (primaryContact) {
-      // Send detailed alert
-      smsService.sendSMS(primaryContact, detailedMessage)
-        .then(() => console.log(`📩 Detailed SMS sent to primary contact: ${primaryContact}`))
-        .catch(err => console.error(`⚠️ Failed to send detailed SMS: ${err.message}`));
-      // Send simple 'help' message
-      smsService.sendSMS(primaryContact, helpMessage)
-        .then(() => console.log(`📩 'help' SMS sent to primary contact: ${primaryContact}`))
-        .catch(err => console.error(`⚠️ Failed to send 'help' SMS: ${err.message}`));
-    } else {
-      console.warn('⚠️ No primary contact found for user');
-    }
+      if (contact && contact.phone) {
+        const primaryPhone = contact.phone;
+        const detailedMessage = `Emergency Alert! ${req.user.name} has triggered an SOS. Location: (${latitude}, ${longitude}).`;
+        const helpMessage = 'help';
+
+        smsService.sendSMS(primaryPhone, detailedMessage)
+          .then(() => console.log(`📩 Detailed SMS sent to primary contact: ${primaryPhone}`))
+          .catch(err => console.error(`⚠️ Failed to send detailed SMS: ${err.message}`));
+        
+        smsService.sendSMS(primaryPhone, helpMessage)
+          .then(() => console.log(`📩 'help' SMS sent to primary contact: ${primaryPhone}`))
+          .catch(err => console.error(`⚠️ Failed to send 'help' SMS: ${err.message}`));
+      } else {
+        console.warn('⚠️ No primary contact found for user', user_id);
+      }
+    });
 
     if (global.wsManager) {
       global.wsManager.broadcastNewAlert(alert);

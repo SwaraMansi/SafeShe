@@ -127,9 +127,13 @@ function UserDashboard() {
         },
         (error) => {
           console.error('Geolocation error:', error);
-          reject(error);
+          const errorMsg = error.code === 1 ? 'Permission denied. Please enable location access.' : 
+                          error.code === 2 ? 'Location unavailable. Check your GPS/WiFi.' : 
+                          error.code === 3 ? 'Location request timed out. Try again.' : 
+                          'Failed to get location. ' + error.message;
+          reject(new Error(errorMsg));
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
       );
     });
   }
@@ -307,9 +311,13 @@ function UserDashboard() {
       },
       (err) => {
         console.error('Geolocation error:', err);
-        setError('Unable to access location');
+        const errorMsg = err.code === 1 ? 'Location permission denied. Please enable location access in browser settings.' : 
+                        err.code === 2 ? 'Location unavailable. Ensure GPS or WiFi is enabled.' : 
+                        err.code === 3 ? 'Location request timed out. Make sure location services are active.' : 
+                        'Location error: ' + err.message;
+        setError(errorMsg);
       },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     );
   }
 
