@@ -380,14 +380,24 @@ function UserDashboard() {
   // ============ SOS PHOTO & OFFLINE FUNCTIONS ============
   async function startCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      console.log('📹 Starting camera...');
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      console.log('✅ Camera stream obtained:', stream);
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          console.log('✅ Video metadata loaded');
+          videoRef.current.play().catch(err => console.error('Play error:', err));
+        };
         setCameraActive(true);
+        console.log('✅ Camera state updated, cameraActive = true');
+      } else {
+        console.error('❌ videoRef.current is null');
       }
     } catch (err) {
-      setError('Camera access denied');
-      console.error('Camera error:', err);
+      setError('Camera access denied: ' + err.message);
+      console.error('❌ Camera error:', err);
     }
   }
 
@@ -900,7 +910,21 @@ function UserDashboard() {
             <button className="btn-primary" onClick={startCamera}>🎥 Open Camera</button>
           ) : (
             <div className="camera-container">
-              <video ref={videoRef} autoPlay playsInline style={{ maxWidth: '100%', borderRadius: '8px' }} />
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted
+                style={{ 
+                  width: '100%', 
+                  height: '400px', 
+                  maxWidth: '100%', 
+                  borderRadius: '8px', 
+                  backgroundColor: '#000', 
+                  display: 'block',
+                  objectFit: 'cover'
+                }} 
+              />
               <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
               <div className="camera-controls">
                 <button className="btn-secondary" onClick={capturePhoto}>📷 Capture Photo</button>
@@ -1122,8 +1146,22 @@ function UserDashboard() {
         .info-text { color: #999; font-size: 0.9em; marginTop: 10px; }
         .auto-call-setting { marginTop: 10px; }
         
-        .camera-container { marginTop: 15px; }
-        .camera-controls { display: flex; gap: 10px; marginTop: 10px; }
+        .camera-container { 
+          marginTop: 15px; 
+          backgroundColor: #000; 
+          borderRadius: 8px; 
+          overflow: hidden; 
+          display: flex;
+          flexDirection: column;
+          alignItems: center;
+          justifyContent: center;
+        }
+        .camera-container video {
+          width: 100%;
+          height: auto;
+          minHeight: 300px;
+          objectFit: cover;
+        }
         .camera-controls button { flex: 1; }
         .photo-preview { marginTop: 15px; }
         
