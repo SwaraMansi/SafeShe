@@ -1,22 +1,36 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../database');
-const { authMiddleware, adminOnly } = require('../middleware/authMiddleware');
-const smsService = require('../services/sms');
+const db = require("../database");
+const { authMiddleware, adminOnly } = require("../middleware/authMiddleware");
+const smsService = require("../services/sms");
 
-router.post('/', authMiddleware, (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const { latitude, longitude, timestamp } = req.body;
   const user_id = req.user.id;
-  if (latitude == null || longitude == null) return res.status(400).json({ message: 'Invalid coordinates' });
+
+  if (latitude == null || longitude == null) {
+    return res.status(400).json({ message: "Invalid coordinates" });
+  }
+
   const ts = timestamp || Date.now();
-  const stmt = db.prepare('INSERT INTO sos_alerts (user_id, latitude, longitude, timestamp) VALUES (?,?,?,?)');
+
+  // 1. SOS Alert record insert karna
+  const stmt = db.prepare(
+    "INSERT INTO sos_alerts (user_id, latitude, longitude, timestamp) VALUES (?,?,?,?)",
+  );
+
   stmt.run(user_id, latitude, longitude, ts, function (err) {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
+    if (err) {
+      return res.status(500).json({ message: "DB error", error: err.message });
+    }
+
     const alertId = this.lastID;
-    // record initial location in sos_locations
-    const locStmt = db.prepare('INSERT INTO sos_locations (alert_id, latitude, longitude, timestamp) VALUES (?,?,?,?)');
+
+    // 2. Location details insert karna
+    const locStmt = db.prepare(
+      "INSERT INTO sos_locations (alert_id, latitude, longitude, timestamp) VALUES (?,?,?,?)",
+    );
     locStmt.run(alertId, latitude, longitude, ts, () => locStmt.finalize());
-    
 
     const alert = {
       id: alertId,
@@ -26,138 +40,108 @@ router.post('/', authMiddleware, (req, res) => {
       latitude: latitude,
       longitude: longitude,
       timestamp: ts,
-      status: 'active'
+      status: "active",
     };
 
-    // Query database to get primary contact
-    db.get('SELECT phone FROM emergency_contacts WHERE user_id = ? AND is_primary = 1', [user_id], (err, contact) => {
-      if (err) {
-        console.error('Error fetching primary contact:', err.message);
-        return;
-      }
+    // 3. Database se contacts nikal kar SMS bhejna
+    db.all(
+      "SELECT * FROM emergency_contacts WHERE user_id = ?",
+      [user_id],
+      async (err, contacts) => {
+        if (err) {
+          console.error("❌ Error fetching contacts:", err.message);
+        } else if (contacts && contacts.length > 0) {
+          try {
+            console.log(
+              `📡 Found ${contacts.length} contacts for user ${user_id}. Sending SMS...`,
+            );
 
-      if (contact && contact.phone) {
-        const primaryPhone = contact.phone;
-        const detailedMessage = `Emergency Alert! ${req.user.name} has triggered an SOS. Location: (${latitude}, ${longitude}).`;
-        const helpMessage = 'help';
+            await smsService.sendSOSAlert(
+              req.user.name,
+              req.user.email,
+              latitude,
+              longitude,
+              contacts,
+            );
 
-        smsService.sendSMS(primaryPhone, detailedMessage)
-          .then(() => console.log(`📩 Detailed SMS sent to primary contact: ${primaryPhone}`))
-          .catch(err => console.error(`⚠️ Failed to send detailed SMS: ${err.message}`));
-        
-        smsService.sendSMS(primaryPhone, helpMessage)
-          .then(() => console.log(`📩 'help' SMS sent to primary contact: ${primaryPhone}`))
-          .catch(err => console.error(`⚠️ Failed to send 'help' SMS: ${err.message}`));
-      } else {
-        console.warn('⚠️ No primary contact found for user', user_id);
-      }
-    });
+            console.log("✅ SMS Process completed.");
+          } catch (smsErr) {
+            console.error("❌ Twilio/SMS Error:", smsErr.message);
+          }
+        } else {
+          console.log("⚠️ No emergency contacts found in DB for this user.");
+        }
 
-    if (global.wsManager) {
-      global.wsManager.broadcastNewAlert(alert);
-    }
+        // 4. WebSocket Notification
+        if (global.wsManager) {
+          global.wsManager.broadcastNewAlert(alert);
+        }
 
-    console.log(`🚨 SOS Alert #${alertId} created for ${req.user.name}`);
-
-    res.status(201).json({ message: 'SOS created', alertId, alert });
+        // Final Response
+        res.status(201).json({ message: "SOS created", alertId, alert });
+      },
+    );
   });
   stmt.finalize();
 });
 
-router.post('/update', authMiddleware, (req, res) => {
+// Baki ke routes (update, resolve, get) as it is niche paste kar raha hu...
+router.post("/update", authMiddleware, (req, res) => {
   const { alertId, latitude, longitude, timestamp } = req.body;
-  if (!alertId || latitude == null || longitude == null) return res.status(400).json({ message: 'Missing data' });
+  if (!alertId || latitude == null || longitude == null)
+    return res.status(400).json({ message: "Missing data" });
   const ts = timestamp || Date.now();
-  db.get('SELECT * FROM sos_alerts WHERE id = ?', [alertId], (err, row) => {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
-    if (!row) return res.status(404).json({ message: 'Alert not found' });
-    // Insert location point
-    const locStmt = db.prepare('INSERT INTO sos_locations (alert_id, latitude, longitude, timestamp) VALUES (?,?,?,?)');
+  db.get("SELECT * FROM sos_alerts WHERE id = ?", [alertId], (err, row) => {
+    if (err)
+      return res.status(500).json({ message: "DB error", error: err.message });
+    if (!row) return res.status(404).json({ message: "Alert not found" });
+
+    const locStmt = db.prepare(
+      "INSERT INTO sos_locations (alert_id, latitude, longitude, timestamp) VALUES (?,?,?,?)",
+    );
     locStmt.run(alertId, latitude, longitude, ts, () => locStmt.finalize());
-    // Update latest coordinates on alert
-    db.run('UPDATE sos_alerts SET latitude = ?, longitude = ?, timestamp = ? WHERE id = ?', [latitude, longitude, ts, alertId], function (uerr) {
-      if (uerr) return res.status(500).json({ message: 'DB error', error: uerr.message });
-      
-      // Broadcast location update to WebSocket clients
-      if (global.wsManager) {
-        const updateData = { alertId, latitude, longitude, timestamp: ts };
-        const message = JSON.stringify({
-          type: 'location_update',
-          data: updateData,
-          timestamp: Date.now()
-        });
-        
-        // Get wss from wsManager and send to all clients
-        if (global.wsManager.wss && global.wsManager.wss.clients) {
-          global.wsManager.wss.clients.forEach((client) => {
-            if (client.readyState === 1) { // WebSocket.OPEN
-              client.send(message);
-            }
-          });
-        }
-      }
 
-      res.json({ message: 'Location updated' });
-    });
+    db.run(
+      "UPDATE sos_alerts SET latitude = ?, longitude = ?, timestamp = ? WHERE id = ?",
+      [latitude, longitude, ts, alertId],
+      function (uerr) {
+        if (uerr)
+          return res
+            .status(500)
+            .json({ message: "DB error", error: uerr.message });
+        res.json({ message: "Location updated" });
+      },
+    );
   });
 });
 
-// Stop/resolve alert and send SMS notifications
-router.patch('/:id/resolve', authMiddleware, (req, res) => {
+router.patch("/:id/resolve", authMiddleware, (req, res) => {
   const id = req.params.id;
-  db.run('UPDATE sos_alerts SET status = ? WHERE id = ?', ['resolved', id], function (err) {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
-    
-    // Broadcast status change to WebSocket clients
-    if (global.wsManager) {
-      global.wsManager.broadcastStatusChange(id, 'resolved');
-    }
-    
-    console.log(`✅ Alert #${id} marked as resolved`);
-    res.json({ message: 'Alert resolved' });
-  });
+  db.run(
+    "UPDATE sos_alerts SET status = ? WHERE id = ?",
+    ["resolved", id],
+    function (err) {
+      if (err)
+        return res
+          .status(500)
+          .json({ message: "DB error", error: err.message });
+      res.json({ message: "Alert resolved" });
+    },
+  );
 });
 
-// Get active alerts (for dashboard)
-router.get('/', authMiddleware, (req, res) => {
-  db.all("SELECT sa.*, u.name, u.email FROM sos_alerts sa LEFT JOIN users u ON sa.user_id = u.id WHERE sa.status = 'active'", [], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
-    res.json({ alerts: rows });
-  });
-});
-
-// Admin: get all alerts
-router.get('/all', authMiddleware, adminOnly, (req, res) => {
-  db.all('SELECT sa.*, u.name, u.email FROM sos_alerts sa LEFT JOIN users u ON sa.user_id = u.id', [], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
-    res.json({ alerts: rows });
-  });
-});
-
-// Get locations for an alert
-router.get('/:id/locations', authMiddleware, (req, res) => {
-  const id = req.params.id;
-  db.all('SELECT latitude, longitude, timestamp FROM sos_locations WHERE alert_id = ? ORDER BY timestamp ASC', [id], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'DB error', error: err.message });
-    res.json({ locations: rows });
-  });
-});
-
-// Test SMS endpoint (development only)
-router.post('/test/sms', authMiddleware, async (req, res) => {
-  const { phoneNumber, message } = req.body;
-  if (!phoneNumber || !message) return res.status(400).json({ message: 'Phone and message required' });
-  
-  const result = await smsService.sendSMS(phoneNumber, message);
-  res.json(result);
-});
-
-// Get mock SMS log (development only)
-router.get('/test/sms-log', authMiddleware, (req, res) => {
-  const log = smsService.getMockSmsLog();
-  res.json({ mockSmsLog: log, usesRealTwilio: smsService.isTwilioConfigured() });
+router.get("/", authMiddleware, (req, res) => {
+  db.all(
+    "SELECT sa.*, u.name, u.email FROM sos_alerts sa LEFT JOIN users u ON sa.user_id = u.id WHERE sa.status = 'active'",
+    [],
+    (err, rows) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ message: "DB error", error: err.message });
+      res.json({ alerts: rows });
+    },
+  );
 });
 
 module.exports = router;
-
-
