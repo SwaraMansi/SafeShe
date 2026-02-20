@@ -34,10 +34,14 @@ async function sendSMS(phoneNumber, message) {
     ? phoneNumber
     : `+${phoneNumber}`;
 
+  // ✅ 160 chars limit — Trial account ke liye
+  const trimmedMessage =
+    message.length > 160 ? message.substring(0, 157) + "..." : message;
+
   try {
     if (USE_TWILIO && twilioClient) {
       const result = await twilioClient.messages.create({
-        body: message,
+        body: trimmedMessage,
         from: TWILIO_PHONE,
         to: formattedPhone,
       });
@@ -49,12 +53,12 @@ async function sendSMS(phoneNumber, message) {
       const mockSms = {
         id: Date.now(),
         to: formattedPhone,
-        message: message,
+        message: trimmedMessage,
         timestamp: new Date().toISOString(),
         provider: "mock",
       };
       mockSmsLog.push(mockSms);
-      console.log(`📱 [MOCK SMS] to ${formattedPhone}: "${message}"`);
+      console.log(`📱 [MOCK SMS] to ${formattedPhone}: "${trimmedMessage}"`);
       return { success: true, provider: "mock", id: mockSms.id };
     }
   } catch (err) {
@@ -70,12 +74,11 @@ async function sendSOSAlert(
   longitude,
   contacts = [],
 ) {
-  // Latitude aur Longitude ko fix kiya
-  const lat = typeof latitude === "number" ? latitude.toFixed(6) : latitude;
-  const lon = typeof longitude === "number" ? longitude.toFixed(6) : longitude;
+  const lat = typeof latitude === "number" ? latitude.toFixed(4) : latitude;
+  const lon = typeof longitude === "number" ? longitude.toFixed(4) : longitude;
 
-  // Short Message for Trial Accounts (Error 30044 Fix)
-  const message = `🚨 SAFESHEE SOS 🚨\n${userName} needs help!\nLocation: https://www.google.com/maps?q=${lat},${lon}`;
+  // ✅ Short message — 160 chars ke andar
+  const message = `SOS: ${userName} needs help! Location: https://maps.google.com/?q=${lat},${lon}`;
 
   const results = [];
   for (const contact of contacts) {

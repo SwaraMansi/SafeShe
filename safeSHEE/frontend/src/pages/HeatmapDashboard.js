@@ -1,6 +1,6 @@
 /**
  * Case Heatmap System - Updated with Red Zone Creation
- * Police can click on map to create red zones
+ * Police can click on map OR enter coordinates manually to create red zones
  */
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
@@ -17,14 +17,12 @@ const HeatmapDashboard = () => {
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Map refs
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
   const markersLayer = useRef(null);
   const heatmapLayer = useRef(null);
   const redZoneLayer = useRef(null);
 
-  // Incident data
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,12 +32,13 @@ const HeatmapDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [categories, setCategories] = useState([]);
 
-  // Red zone state
   const [redZones, setRedZones] = useState([]);
   const [createMode, setCreateMode] = useState(false);
   const [pendingZone, setPendingZone] = useState(null);
   const [zoneForm, setZoneForm] = useState({
     name: "",
+    latitude: "",
+    longitude: "",
     radius_meters: 500,
     risk_level: "high",
     description: "",
@@ -48,12 +47,10 @@ const HeatmapDashboard = () => {
   const [zoneLoading, setZoneLoading] = useState(false);
   const tempMarkerRef = useRef(null);
 
-  // Role check
   useEffect(() => {
     if (!user || user.role !== "police") navigate("/");
   }, [user, navigate]);
 
-  // Fetch incident locations
   const fetchLocations = async () => {
     try {
       setLoading(true);
@@ -78,7 +75,6 @@ const HeatmapDashboard = () => {
     }
   };
 
-  // Fetch red zones
   const fetchRedZones = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/redzones`, {
@@ -96,19 +92,6 @@ const HeatmapDashboard = () => {
     }
   }, [token]);
 
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
     mapInstance.current = L.map(mapContainer.current).setView(
@@ -125,7 +108,6 @@ const HeatmapDashboard = () => {
     fetchRedZones();
   }, [token]);
 
-  // Reverse geocoding
   async function getLocationName(lat, lng) {
     try {
       const res = await fetch(
@@ -147,6 +129,21 @@ const HeatmapDashboard = () => {
     }
   }
 
+  // Place marker on map at given lat/lng
+  function placeMarkerOnMap(lat, lng) {
+    if (!mapInstance.current) return;
+    if (tempMarkerRef.current)
+      mapInstance.current.removeLayer(tempMarkerRef.current);
+    tempMarkerRef.current = L.marker([lat, lng], {
+      icon: L.divIcon({
+        html: `<div style="background:#dc2626;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(220,38,38,0.8)"></div>`,
+        iconSize: [16, 16],
+        className: "",
+      }),
+    }).addTo(mapInstance.current);
+    mapInstance.current.setView([lat, lng], 15);
+  }
+
   // Map click handler
   useEffect(() => {
     if (!mapInstance.current) return;
@@ -154,21 +151,21 @@ const HeatmapDashboard = () => {
     async function onMapClick(e) {
       if (!createMode) return;
       const { lat, lng } = e.latlng;
-      if (tempMarkerRef.current) map.removeLayer(tempMarkerRef.current);
-      tempMarkerRef.current = L.marker([lat, lng], {
-        icon: L.divIcon({
-          html: `<div style="background:#dc2626;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(220,38,38,0.8)"></div>`,
-          iconSize: [16, 16],
-          className: "",
-        }),
-      }).addTo(map);
+      placeMarkerOnMap(lat, lng);
       setPendingZone({ lat, lng });
+      setZoneForm((p) => ({
+        ...p,
+        latitude: lat.toFixed(6),
+        longitude: lng.toFixed(6),
+      }));
       setZoneMsg("");
-
       // Auto-fill zone name
-      setZoneForm((p) => ({ ...p, name: "📍 Fetching location..." }));
+      setZoneForm((p) => ({ ...p, name: p.name || "📍 Fetching location..." }));
       const name = await getLocationName(lat, lng);
-      setZoneForm((p) => ({ ...p, name: name || "" }));
+      setZoneForm((p) => ({
+        ...p,
+        name: p.name === "📍 Fetching location..." ? name || "" : p.name,
+      }));
     }
     map.on("click", onMapClick);
     return () => map.off("click", onMapClick);
@@ -200,13 +197,13 @@ const HeatmapDashboard = () => {
       })
         .bindPopup(
           `
-        <div style="font-size:13px;min-width:150px">
-          <strong>🚩 ${zone.name}</strong><br/>
-          <span style="color:${color};font-weight:bold;text-transform:uppercase">${zone.riskLevel} RISK</span><br/>
-          Radius: ${zone.radiusMeters}m<br/>
-          ${zone.description ? `<em>${zone.description}</em>` : ""}
-        </div>
-      `,
+          <div style="font-size:13px;min-width:150px">
+            <strong>🚩 ${zone.name}</strong><br/>
+            <span style="color:${color};font-weight:bold;text-transform:uppercase">${zone.riskLevel} RISK</span><br/>
+            Radius: ${zone.radiusMeters}m<br/>
+            ${zone.description ? `<em>${zone.description}</em>` : ""}
+          </div>
+        `,
         )
         .addTo(redZoneLayer.current);
       L.marker([lat, lng], {
@@ -219,7 +216,7 @@ const HeatmapDashboard = () => {
     });
   }, [redZones, showRedZones]);
 
-  // Update incident markers and heatmap
+  // Update markers and heatmap
   useEffect(() => {
     if (!mapInstance.current || !locations.length) return;
     const filtered =
@@ -269,15 +266,57 @@ const HeatmapDashboard = () => {
     }
   }, [locations, showMarkers, showHeatmap, selectedCategory]);
 
-  // Create red zone
+  // Use my current location
+  function useCurrentLocation() {
+    setZoneMsg("📍 Getting your location...");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(6));
+        const lng = parseFloat(pos.coords.longitude.toFixed(6));
+        setPendingZone({ lat, lng });
+        setZoneForm((p) => ({
+          ...p,
+          latitude: String(lat),
+          longitude: String(lng),
+        }));
+        placeMarkerOnMap(lat, lng);
+        setZoneMsg("✅ Current location set!");
+        setTimeout(() => setZoneMsg(""), 2000);
+      },
+      () => setZoneMsg("❌ Location access denied"),
+    );
+  }
+
+  // Handle manual lat/lng input change
+  function handleLatLngChange(field, value) {
+    setZoneForm((p) => ({ ...p, [field]: value }));
+    const lat =
+      field === "latitude" ? parseFloat(value) : parseFloat(zoneForm.latitude);
+    const lng =
+      field === "longitude"
+        ? parseFloat(value)
+        : parseFloat(zoneForm.longitude);
+    if (
+      !isNaN(lat) &&
+      !isNaN(lng) &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180
+    ) {
+      setPendingZone({ lat, lng });
+      placeMarkerOnMap(lat, lng);
+    }
+  }
+
   async function handleCreateZone(e) {
     e.preventDefault();
     if (!pendingZone) {
-      setZoneMsg("❌ Click on map to select location first");
+      setZoneMsg("❌ Location select karo pehle");
       return;
     }
     if (!zoneForm.name) {
-      setZoneMsg("❌ Zone name required");
+      setZoneMsg("❌ Zone name required hai");
       return;
     }
     setZoneLoading(true);
@@ -300,9 +339,11 @@ const HeatmapDashboard = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        setZoneMsg("✅ Red zone created!");
+        setZoneMsg("✅ Red zone create ho gaya!");
         setZoneForm({
           name: "",
+          latitude: "",
+          longitude: "",
           radius_meters: 500,
           risk_level: "high",
           description: "",
@@ -325,7 +366,6 @@ const HeatmapDashboard = () => {
     }
   }
 
-  // Delete red zone
   async function handleDelete(id) {
     if (!window.confirm("Delete this red zone?")) return;
     try {
@@ -348,6 +388,8 @@ const HeatmapDashboard = () => {
     setPendingZone(null);
     setZoneForm({
       name: "",
+      latitude: "",
+      longitude: "",
       radius_meters: 500,
       risk_level: "high",
       description: "",
@@ -382,7 +424,7 @@ const HeatmapDashboard = () => {
         minHeight: "100vh",
       }}
     >
-      {/* Header with Back Button */}
+      {/* Header */}
       <div
         style={{
           marginBottom: "20px",
@@ -405,7 +447,6 @@ const HeatmapDashboard = () => {
             Geographic density, risk hotspots & red zone management
           </p>
         </div>
-        {/* Back Button */}
         <button
           onClick={() => navigate("/police")}
           style={{
@@ -417,9 +458,6 @@ const HeatmapDashboard = () => {
             cursor: "pointer",
             fontSize: "14px",
             fontWeight: "bold",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
           }}
         >
           ← Back to Incident Management
@@ -517,25 +555,7 @@ const HeatmapDashboard = () => {
         </button>
       </div>
 
-      {/* Location selected hint */}
-      {createMode && pendingZone && (
-        <div
-          style={{
-            marginBottom: "12px",
-            padding: "10px 16px",
-            backgroundColor: "#064e3b",
-            border: "1px solid #10b981",
-            borderRadius: "6px",
-            fontSize: "13px",
-            color: "#4ade80",
-          }}
-        >
-          ✅ Location selected: {pendingZone.lat.toFixed(4)},{" "}
-          {pendingZone.lng.toFixed(4)} — Fill the form below and click Create
-          Zone.
-        </div>
-      )}
-      {createMode && !pendingZone && (
+      {createMode && (
         <div
           style={{
             marginBottom: "12px",
@@ -547,7 +567,8 @@ const HeatmapDashboard = () => {
             color: "#93c5fd",
           }}
         >
-          🖱️ Click anywhere on the map to select the red zone location.
+          🖱️ Map pe click karo <strong>ya</strong> neeche manually coordinates
+          enter karo <strong>ya</strong> "Use My Location" dabao
         </div>
       )}
 
@@ -606,6 +627,7 @@ const HeatmapDashboard = () => {
               >
                 🚩 New Red Zone Details
               </h3>
+
               {zoneMsg && (
                 <div
                   style={{
@@ -622,6 +644,7 @@ const HeatmapDashboard = () => {
                   {zoneMsg}
                 </div>
               )}
+
               <form onSubmit={handleCreateZone}>
                 <div
                   style={{
@@ -631,6 +654,7 @@ const HeatmapDashboard = () => {
                     marginBottom: "10px",
                   }}
                 >
+                  {/* Zone Name */}
                   <div style={{ gridColumn: "1/-1" }}>
                     <label style={lbl}>Zone Name *</label>
                     <input
@@ -643,13 +667,78 @@ const HeatmapDashboard = () => {
                       required
                     />
                   </div>
+
+                  {/* ✅ Use My Location Button */}
+                  <div style={{ gridColumn: "1/-1" }}>
+                    <button
+                      type="button"
+                      onClick={useCurrentLocation}
+                      style={{
+                        width: "100%",
+                        padding: "9px",
+                        backgroundColor: "#1e3a5f",
+                        color: "#93c5fd",
+                        border: "1px solid #3b82f6",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      📍 Use My Current Location
+                    </button>
+                  </div>
+
+                  {/* ✅ Manual Latitude */}
+                  <div>
+                    <label style={lbl}>Latitude *</label>
+                    <input
+                      style={inp}
+                      type="number"
+                      step="any"
+                      placeholder="e.g. 28.5109"
+                      value={zoneForm.latitude}
+                      onChange={(e) =>
+                        handleLatLngChange("latitude", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* ✅ Manual Longitude */}
+                  <div>
+                    <label style={lbl}>Longitude *</label>
+                    <input
+                      style={inp}
+                      type="number"
+                      step="any"
+                      placeholder="e.g. 77.3148"
+                      value={zoneForm.longitude}
+                      onChange={(e) =>
+                        handleLatLngChange("longitude", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <p
+                    style={{
+                      gridColumn: "1/-1",
+                      fontSize: "11px",
+                      color: "#6b7280",
+                      margin: "0",
+                    }}
+                  >
+                    Ya map pe click karo — coordinates automatically fill ho
+                    jaayenge
+                  </p>
+
+                  {/* Radius */}
                   <div>
                     <label style={lbl}>Radius (meters)</label>
                     <input
                       style={inp}
                       type="number"
                       min="100"
-                      max="5000"
+                      max="10000"
                       value={zoneForm.radius_meters}
                       onChange={(e) =>
                         setZoneForm((p) => ({
@@ -659,6 +748,8 @@ const HeatmapDashboard = () => {
                       }
                     />
                   </div>
+
+                  {/* Risk Level */}
                   <div>
                     <label style={lbl}>Risk Level</label>
                     <select
@@ -676,6 +767,8 @@ const HeatmapDashboard = () => {
                       <option value="low">🟢 Low</option>
                     </select>
                   </div>
+
+                  {/* Description */}
                   <div style={{ gridColumn: "1/-1" }}>
                     <label style={lbl}>Description (optional)</label>
                     <input
@@ -691,6 +784,25 @@ const HeatmapDashboard = () => {
                     />
                   </div>
                 </div>
+
+                {/* Selected location preview */}
+                {pendingZone && (
+                  <div
+                    style={{
+                      padding: "8px 12px",
+                      marginBottom: "10px",
+                      backgroundColor: "#064e3b",
+                      border: "1px solid #10b981",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      color: "#4ade80",
+                    }}
+                  >
+                    ✅ Location: {pendingZone.lat.toFixed(4)},{" "}
+                    {pendingZone.lng.toFixed(4)}
+                  </div>
+                )}
+
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button
                     type="submit"
@@ -711,7 +823,7 @@ const HeatmapDashboard = () => {
                       ? "Creating..."
                       : pendingZone
                         ? "🚩 Create Zone"
-                        : "⬆️ Click Map First"}
+                        : "⬆️ Location Select Karo Pehle"}
                   </button>
                   <button
                     type="button"
@@ -733,7 +845,7 @@ const HeatmapDashboard = () => {
           )}
         </div>
 
-        {/* Right Panel: Active Red Zones only */}
+        {/* Right: Active Red Zones */}
         <div
           style={{
             backgroundColor: "#1e293b",
@@ -847,6 +959,16 @@ const HeatmapDashboard = () => {
                         {zone.description}
                       </div>
                     )}
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#4b5563",
+                        marginTop: "3px",
+                      }}
+                    >
+                      📍 {zone.center?.latitude?.toFixed(4)},{" "}
+                      {zone.center?.longitude?.toFixed(4)}
+                    </div>
                   </div>
                   <button
                     onClick={() => handleDelete(zone.id)}
