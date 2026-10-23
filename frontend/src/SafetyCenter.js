@@ -165,7 +165,6 @@ export default function SafetyCenter() {
     <section className="safety-center" aria-labelledby="safety-tools-title">
       <div className="safety-center-heading">
         <div><p className="eyebrow">Protection tools</p><h2 id="safety-tools-title">Your safety layer</h2><p>Optional browser-powered tools that keep working during a presentation or offline demo.</p></div>
-        <span className="preview-pill">Frontend preview</span>
       </div>
       <div className="safety-tools-grid">
         <article className="safety-tool-card zone-tool"><span className="tool-symbol">⌖</span><div><h3>Red zone guard</h3><p>{zoneStatus}</p><small>{location ? `${location.lat.toFixed(3)}, ${location.lng.toFixed(3)}` : "Waiting for location"}</small></div><span className="tool-state active">Watching</span></article>
