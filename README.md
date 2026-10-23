@@ -25,4 +25,29 @@
 
 ---
 
-## 🏗️ System Architecture & Tech Stack
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React.js, React Router, Leaflet.js, Chart.js / Recharts, Web Speech API, DeviceMotion API |
+| **Backend** | Node.js, Express.js, JWT Authentication, WebSockets |
+| **Database** | SQLite / SQL-based storage |
+
+---
+
+## 🚀 Deployment
+
+### Live Demo
+The web application is deployed and accessible on GitHub Pages:
+👉 **[Live Application Page](https://swaramansi.github.io/SafeShe/)**
+
+---
+
+### 💻 Local Installation & Setup
+
+#### Prerequisites
+* Node.js (v16.0 or higher)
+* npm or yarn
+
+#### 1. Clone the Repository
+```bash
+git clone [https://github.com/SwaraMansi/SafeShe.git](https://github.com/SwaraMansi/SafeShe.git)
+cd SafeShe
