@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ReportForm from './ReportForm';
 import Dashboard from './Dashboard';
 import SOSButton from './SOSButton';
+import SafetyCenter from './SafetyCenter';
 import './App.css';
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
               <div><span className="guidance-number">01</span><div><h3>Need urgent help?</h3><p>Press SOS once. We will prepare an alert and location for responders.</p></div></div>
               <div><span className="guidance-number">02</span><div><h3>Want to report safely?</h3><p>Document an incident privately. Location sharing is always optional.</p></div></div>
             </div>
+            <SafetyCenter />
           </>
         )}
 
