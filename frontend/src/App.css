@@ -328,6 +328,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .message-body { font-size: .9rem; line-height: 1.45; }
 .message-dismiss { margin-top: 12px; padding: 5px 0; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: .8rem; font-weight: 800; text-decoration: underline; }
 
+.stat-card,
+.home-guidance > div,
+.safety-center,
+.safety-tool-card,
+.card {
+  outline: 1px solid #111;
+}
+
 @media (max-width: 720px) {
   .app-header { align-items: flex-start; padding: 20px; }
   .header-status { display: none; }
