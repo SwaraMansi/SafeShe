@@ -39,14 +39,6 @@
 The web application is deployed and accessible on GitHub Pages:
 👉 **[Live Application Page](https://swaramansi.github.io/SafeShe/)**
 
----
-
-### 💻 Local Installation & Setup
-
-#### Prerequisites
-* Node.js (v16.0 or higher)
-* npm or yarn
-
 #### 1. Clone the Repository
 ```bash
 git clone [https://github.com/SwaraMansi/SafeShe.git](https://github.com/SwaraMansi/SafeShe.git)
