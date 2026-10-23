@@ -1,216 +1,28 @@
-# SafeShe – AI-Powered Women Safety & Incident Management Platform
+# 🛡️ SafeShe – AI-Powered Women's Safety & Incident Management Platform
 
-## 🌍 Overview
+[![Deployments](https://img.shields.io/badge/Deployments-GitHub%20Pages-brightgreen)](https://swaramansi.github.io/SafeShe/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![JavaScript](https://img.shields.io/badge/JavaScript-90.5%25-yellow)](https://github.com/SwaraMansi/SafeShe)
 
-**safeSHEE** is a full-stack AI-driven safety platform designed to enhance women’s safety through proactive detection, intelligent escalation, and police-side prioritization.
-
-The system integrates:
-
-- 📍 Real-time location tracking
-- 🔴 Red zone geo-fencing
-- 🎤 AI voice distress detection
-- 📱 Panic gesture detection
-- 📩 Emergency contact escalation
-- 👮 Police analytics & risk prioritization
-- 🧠 ML-based risk prediction
-- 🗺 Incident heatmaps
-
-This platform combines preventive, reactive, and predictive safety mechanisms into a single intelligent ecosystem.
+> **SafeShe** is a full-stack, AI-driven safety ecosystem designed to bridge the gap between instant victim assistance and real-time emergency responder prioritization. By combining preventive geofencing, reactive distress detection, and predictive analytics, SafeShe empowers users and enables authorities to act faster.
 
 ---
 
-## 🧠 Core Architecture
+## 🌟 Key Features & Functional Modules
 
-### 👤 User Layer
+### 👤 User Safety Layer (Client Side)
+* 🔴 **Red Zone Geo-Fencing:** Tracks user location using `watchPosition()` to issue real-time warnings upon entering high-risk areas identified by historical incident data.
+* 🎤 **AI Voice Distress Detection:** Continuously listens for emergency trigger words (e.g., *"help"*, *"stop"*, *"danger"*) via the Web Speech API to initiate silent SOS alerts.
+* 📱 **Panic Gesture Detection:** Uses device acceleration and movement via the `DeviceMotion API` to detect rapid shake gestures for instant, hands-free distress signals.
+* 📸 **Auto-Evidence Capture:** Automatically captures camera snapshots when an SOS is triggered and attaches them securely to the emergency incident log.
+* 📍 **Smart Safety Mode:** Periodically shares live location coordinates every 10 seconds, checks in on user activity, and escalates to emergency contacts if unattended.
+* 📵 **Offline SMS Fallback:** Automatically generates pre-filled SMS messages containing Google Maps coordinates if internet connectivity drops.
 
-- SOS Trigger  
-- Red Zone Detection  
-- Voice Distress AI  
-- Safety Mode (live tracking)  
-- Quick Dial Contacts  
-- Offline SMS Fallback  
-
-### 👮 Police Layer
-
-- Live Incident Dashboard  
-- AI Risk Scoring  
-- Priority Queue Engine  
-- Heatmap Visualization  
-- Analytics Dashboard  
-
-### 🤖 Intelligence Layer
-
-- Machine Learning Risk Prediction  
-- Dynamic Case Prioritization  
-- Geo-cluster Risk Calculation  
+### 👮 Responder & Police Analytics Layer (Dashboard Side)
+* 📊 **Live Incident Dashboard:** Monitors incoming alerts, categorizes active vs. resolved cases, and provides real-time response trends.
+* 🗺️ **Interactive Heatmaps:** visualizes high-risk zones using interactive mapping libraries (`Leaflet.js`) weighted by AI/ML risk scoring.
+* 🧠 **ML-Based Risk Prioritization:** Dynamically ranks incidents into **Critical**, **High**, **Medium**, and **Low** priorities using factors like area density, unresolved duration, and category severity.
 
 ---
 
-## 🚀 Key Features
-
-### 🔴 Red Zone Geo-Fencing
-
-Detects when a user enters high-risk areas based on historical incident density and AI risk scoring.
-
-- Real-time monitoring via `watchPosition()`
-- Browser notifications
-- Optional emergency contact notification
-- Cooldown system to prevent alert spam
-
----
-
-### 🎤 AI Voice Distress Detection
-
-Continuously listens (when enabled) for distress keywords such as:
-
-- “help”
-- “stop”
-- “danger”
-
-When triggered:
-
-- Silent SOS is activated  
-- Location is captured  
-- Report is generated  
-- Primary contact is notified  
-
----
-
-### 📱 Panic Gesture Detection
-
-Detects rapid device shake patterns using the DeviceMotion API and triggers silent emergency alerts.
-
----
-
-### 📸 Auto Evidence Capture
-
-When SOS is triggered:
-
-- Camera snapshot is captured  
-- Image is attached to report  
-- Stored securely in backend  
-
----
-
-### 📍 Smart Safety Mode
-
-- Shares live location every 10 seconds  
-- Detects inactivity  
-- Prompts safety confirmation  
-- Escalates if no response  
-
----
-
-### 🧠 ML-Based Risk Prediction
-
-Dynamic risk scoring based on:
-
-- Incident category  
-- Time of day  
-- Area density  
-- Time unresolved  
-- Historical patterns  
-
-Police dashboard automatically prioritizes:
-
-- Critical  
-- High  
-- Medium  
-- Low  
-
----
-
-### 🗺 Heatmap Visualization
-
-- Displays incident clusters  
-- Weighted by predicted risk score  
-- Toggle between markers and heatmap  
-- Top unsafe zones panel  
-
----
-
-### 📊 Police Analytics Dashboard
-
-- Total incidents  
-- Active vs resolved  
-- Category distribution  
-- Risk distribution  
-- 7-day trends  
-- Average response time  
-
----
-
-### 📵 Offline SMS Fallback
-
-If internet is unavailable:
-
-- Automatically opens SMS intent  
-- Prefills Google Maps location  
-- Notifies primary contact  
-
----
-
-## 🏗 Tech Stack
-
-### Frontend
-
-- React.js  
-- React Router  
-- Leaflet.js  
-- Chart.js / Recharts  
-- Web Speech API  
-- DeviceMotion API  
-- Notification API  
-
-### Backend
-
-- Node.js  
-- Express.js  
-- JWT Authentication  
-- SQLite / SQL-based storage  
-- REST APIs  
-- WebSocket (optional)  
-
----
-
-## 🔐 Security
-
-- JWT-based authentication  
-- Role-based access (User / Police)  
-- Protected API routes  
-- Controlled escalation settings  
-- Cooldown protection to prevent spam  
-
----
-
-## 🎯 Hackathon Value Proposition
-
-**safeSHEE is not just an SOS app.**
-
-It introduces a layered safety framework:
-
-### 🔵 Preventive
-- Red zone detection  
-- AI-powered risk awareness  
-
-### 🟡 Reactive
-- Voice-triggered emergency alerts  
-- Panic gesture detection  
-- Smart Safety Mode with live tracking  
-
-### 🔴 Predictive
-- ML-based case prioritization  
-- Real-time incident heatmaps  
-
-This ensures both **user-level safety** and **intelligent police-side decision making**.
-
----
-
-## 📈 Future Enhancements
-
-- Native mobile application  
-- Real-time police dispatch integration  
-- Wearable hardware API integration  
-- Advanced ML training pipeline  
-- Cloud-based persistent storage  
-- Encrypted evidence vault  
+## 🏗️ System Architecture & Tech Stack
