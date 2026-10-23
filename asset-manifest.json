@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/SafeShe/static/css/main.fdfa1746.css",
+    "main.js": "/SafeShe/static/js/main.1777e555.js",
+    "static/js/453.20359781.chunk.js": "/SafeShe/static/js/453.20359781.chunk.js",
+    "static/media/women-background.png": "/SafeShe/static/media/women-background.b81c8e9bda535edeb26a.png",
+    "static/media/site-background.jpg": "/SafeShe/static/media/site-background.1abb1e2e6314af84fd32.jpg",
+    "index.html": "/SafeShe/index.html",
+    "main.fdfa1746.css.map": "/SafeShe/static/css/main.fdfa1746.css.map",
+    "main.1777e555.js.map": "/SafeShe/static/js/main.1777e555.js.map",
+    "453.20359781.chunk.js.map": "/SafeShe/static/js/453.20359781.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fdfa1746.css",
+    "static/js/main.1777e555.js"
+  ]
+}
