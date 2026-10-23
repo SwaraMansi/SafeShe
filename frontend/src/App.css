@@ -26,7 +26,46 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   outline-offset: 2px;
 }
 
-.App { min-height: 100vh; background: linear-gradient(180deg, #f2f1ff 0, #f8f8fc 390px); }
+.App {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(246, 166, 207, .34), transparent 26rem),
+    radial-gradient(circle at 92% 14%, rgba(129, 211, 255, .34), transparent 24rem),
+    radial-gradient(circle at 78% 82%, rgba(178, 157, 255, .28), transparent 26rem),
+    linear-gradient(180deg, #f1efff 0, #faf9ff 46%, #f5f8ff 100%);
+}
+
+.App::before,
+.App::after {
+  position: absolute;
+  z-index: -1;
+  display: block;
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+  filter: blur(1px);
+}
+
+.App::before {
+  top: 420px;
+  left: -150px;
+  width: 360px;
+  height: 360px;
+  background: linear-gradient(145deg, rgba(255, 183, 213, .24), rgba(255, 231, 168, .1));
+  transform: rotate(25deg);
+}
+
+.App::after {
+  right: -130px;
+  bottom: 120px;
+  width: 330px;
+  height: 330px;
+  background: linear-gradient(145deg, rgba(133, 220, 255, .2), rgba(177, 158, 255, .18));
+  transform: rotate(-18deg);
+}
 
 .app-header {
   display: flex;
@@ -70,7 +109,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 28px;
   min-height: 310px; margin-bottom: 22px; padding: 44px clamp(24px, 6vw, 72px);
   border-radius: 24px; color: white;
-  background: radial-gradient(circle at 80% 30%, rgba(150, 140, 255, .34), transparent 33%), linear-gradient(115deg, #28245d, #5145b6);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 184, 213, .2), transparent 32%),
+    radial-gradient(circle at 90% 100%, rgba(103, 214, 255, .2), transparent 34%),
+    radial-gradient(circle at 80% 30%, rgba(150, 140, 255, .34), transparent 33%),
+    linear-gradient(115deg, #28245d, #5145b6);
   box-shadow: var(--shadow);
 }
 .hero-copy { max-width: 570px; }
