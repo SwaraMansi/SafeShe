@@ -11,11 +11,9 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <div className="brand-mark" aria-hidden="true">✦</div>
         <div>
           <p className="eyebrow">Safety, support, and action</p>
           <h1>SafeSHEE</h1>
-          <p className="app-tagline">A calmer way to get help when it matters.</p>
         </div>
         <div className="header-status"><span className="status-dot" /> Safety centre</div>
       </header>
