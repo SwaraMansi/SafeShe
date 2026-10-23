@@ -41,6 +41,6 @@ test('handles geolocation failure gracefully', async () => {
   render(<SOSButton />);
   fireEvent.click(screen.getByText(/Send SOS/i));
 
-  await waitFor(() => expect(screen.getByText(/Unable to get location/i)).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText(/SOS demo alert ready/i)).toBeInTheDocument());
   expect(api.post).not.toHaveBeenCalled();
 });

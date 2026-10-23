@@ -111,6 +111,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .card h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.04em; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .live-badge { padding: 7px 11px; border-radius: 20px; color: #14754f; background: #e8fbf2; font-size: .8rem; font-weight: 800; }
+.demo-badge { color: #8d6515; background: #fff5d8; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .filter-button { padding: 9px 13px; color: var(--muted); background: var(--soft); }
 .filter-button:hover, .filter-button.active { color: white; background: var(--purple); }
@@ -136,6 +137,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .dashboard-footer p { margin: 0; }
 
 .form-group { margin-bottom: 21px; }
+.form-intro { max-width: 680px; margin: -10px 0 28px; color: var(--muted); line-height: 1.6; }
+.form-assurance { padding: 8px 11px; border-radius: 20px; color: var(--purple-dark); background: #eeecff; font-size: .78rem; font-weight: 800; white-space: nowrap; }
 .form-group label { display: block; margin-bottom: 8px; color: var(--ink); font-weight: 700; font-size: .9rem; }
 .form-group textarea, .form-group input, .form-group select { width: 100%; padding: 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: #fcfcfe; }
 .form-group textarea { resize: vertical; }
@@ -148,9 +151,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .submit-button:disabled { cursor: wait; opacity: .65; }
 .sos-message, .success-message, .error-message { margin-top: 18px; padding: 15px; border-radius: 10px; border-left: 4px solid; }
 .success-message { color: #176b49; background: #e8f8ef; border-color: #27a66d; }
+.demo-message { color: #79570d; background: #fff5d8; border-color: #e3ac37; }
 .error-message { color: #a92340; background: #ffe8ed; border-color: #db4561; }
 .message-title { margin-bottom: 4px; font-weight: 800; }
 .message-body { font-size: .9rem; line-height: 1.45; }
+.message-dismiss { margin-top: 12px; padding: 5px 0; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: .8rem; font-weight: 800; text-decoration: underline; }
 
 @media (max-width: 720px) {
   .app-header { align-items: flex-start; padding: 20px; }
@@ -164,4 +169,5 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .home-guidance { grid-template-columns: 1fr; }
   .section-heading { align-items: flex-start; }
+  .form-assurance { display: none; }
 }

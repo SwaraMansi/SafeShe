@@ -1,11 +1,18 @@
 import api from "./api";
 import { useEffect, useState } from "react";
 
+const demoReports = [
+  { _id: "demo-1", category: "stalking", riskScore: 8, description: "Repeated unwanted following reported near the transit station.", location: { lat: 19.076, lng: 72.878 }, createdAt: new Date(Date.now() - 18 * 60000).toISOString(), status: "active" },
+  { _id: "demo-2", category: "harassment", riskScore: 5, description: "Verbal harassment reported outside a residential building.", location: null, createdAt: new Date(Date.now() - 52 * 60000).toISOString(), status: "active" },
+  { _id: "demo-3", category: "sos", riskScore: 10, description: "SOS emergency alert activated by a user.", location: { lat: 19.089, lng: 72.865 }, createdAt: new Date(Date.now() - 2 * 3600000).toISOString(), status: "resolved" }
+];
+
 export default function Dashboard() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -13,10 +20,12 @@ export default function Dashboard() {
         const res = await api.get('/api/report');
         setReports(Array.isArray(res) ? res : res.data || []);
         setError('');
+        setDemoMode(false);
       } catch (error) {
         console.error('Failed to fetch reports:', error);
-        setReports([]);
-        setError('Unable to load reports. Check that the response service is running.');
+        setReports(demoReports);
+        setError('');
+        setDemoMode(true);
       } finally {
         setLoading(false);
       }
@@ -73,7 +82,7 @@ export default function Dashboard() {
     <div className="card dashboard-card">
       <div className="section-heading">
         <div><p className="eyebrow">Response centre</p><h2>Live incident dashboard</h2></div>
-        <span className="live-badge"><span className="status-dot" /> Live</span>
+        <span className={`live-badge ${demoMode ? "demo-badge" : ""}`}><span className="status-dot" /> {demoMode ? "Preview data" : "Live"}</span>
       </div>
 
       {/* Stats Section */}

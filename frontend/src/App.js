@@ -16,7 +16,7 @@ function App() {
           <h1>SafeSHEE</h1>
           <p className="app-tagline">A calmer way to get help when it matters.</p>
         </div>
-        <div className="header-status"><span className="status-dot" /> Services online</div>
+        <div className="header-status"><span className="status-dot" /> Safety centre</div>
       </header>
 
       <div className="app-container">
@@ -53,7 +53,7 @@ function App() {
               <div className="hero-copy">
                 <p className="eyebrow">You are not alone</p>
                 <h2>Your safety comes first.</h2>
-                <p>Send an emergency alert, share your location, or document an incident in a few taps.</p>
+                <p>One calm place to alert trusted responders, share your location, and document what happened.</p>
               </div>
               <SOSButton />
             </div>
@@ -78,8 +78,8 @@ function App() {
             </div>
 
             <div className="home-guidance">
-              <div><span className="guidance-number">01</span><div><h3>Need urgent help?</h3><p>Use SOS to send your current location immediately.</p></div></div>
-              <div><span className="guidance-number">02</span><div><h3>Want to report safely?</h3><p>Describe what happened and choose whether to share your location.</p></div></div>
+              <div><span className="guidance-number">01</span><div><h3>Need urgent help?</h3><p>Press SOS once. We will prepare an alert and location for responders.</p></div></div>
+              <div><span className="guidance-number">02</span><div><h3>Want to report safely?</h3><p>Document an incident privately. Location sharing is always optional.</p></div></div>
             </div>
           </>
         )}

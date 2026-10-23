@@ -20,8 +20,8 @@ test('submits report without location', async () => {
   api.post.mockResolvedValue({});
   render(<ReportForm />);
 
-  fireEvent.change(screen.getByPlaceholderText(/Provide details about the incident/i), { target: { value: 'Test incident' } });
-  fireEvent.click(screen.getByLabelText(/Share my location/));
+  fireEvent.change(screen.getByPlaceholderText(/Include what happened/i), { target: { value: 'Test incident' } });
+  fireEvent.click(screen.getByLabelText(/Share my approximate location/));
   fireEvent.click(screen.getByText(/Submit Report/i));
 
   await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', {
@@ -36,7 +36,7 @@ test('submits report with location when checked', async () => {
   api.post.mockResolvedValue({});
 
   render(<ReportForm />);
-  fireEvent.change(screen.getByPlaceholderText(/Provide details about the incident/i), { target: { value: 'Test incident' } });
+  fireEvent.change(screen.getByPlaceholderText(/Include what happened/i), { target: { value: 'Test incident' } });
   fireEvent.click(screen.getByText(/Submit Report/i));
 
   await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', {

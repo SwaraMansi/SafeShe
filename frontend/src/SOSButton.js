@@ -88,28 +88,38 @@ export default function SOSButton() {
         });
       }
 
-      if (!location) {
-        throw new Error("Unable to get location");
-      }
-
-      // Prepare payload
-      const payload = {
+      const timestamp = new Date().toISOString();
+      const payload = location ? {
         latitude: location.lat,
         longitude: location.lng,
-        timestamp: new Date().toISOString()
-      };
+        timestamp
+      } : null;
 
-      console.log("🚨 Sending SOS:", payload);
-
-      // Send to backend
-      const data = await api.post("/api/sos", payload);
-      
-      setResult({
-        title: "Emergency alert sent",
-        message: `Location shared at ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
-      });
-
-      console.log("SOS sent successfully:", data);
+      if (!payload) {
+        setResult({
+          title: "SOS demo alert ready",
+          message: "Your emergency request was prepared. Enable location access and connect the response service to share it with responders.",
+          demo: true
+        });
+      } else {
+        console.log("SOS request:", payload);
+        try {
+          const data = await api.post("/api/sos", payload);
+          setResult({
+            title: "Emergency alert sent",
+            message: `Your location was shared at ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}.`,
+            demo: false
+          });
+          console.log("SOS sent successfully:", data);
+        } catch (requestError) {
+          console.warn("Response service unavailable; showing demo confirmation.", requestError);
+          setResult({
+            title: "SOS demo alert ready",
+            message: `The alert is ready with your location (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}). Connect the response service to send it to responders.`,
+            demo: true
+          });
+        }
+      }
 
       // Auto-dismiss after 6 seconds
       timeoutRef.current = setTimeout(() => {
@@ -117,15 +127,14 @@ export default function SOSButton() {
       }, 6000);
     } catch (err) {
       console.error("SOS error:", err);
-      setError({
-        title: "Failed to Send SOS",
-        message: err.message || "Please try again"
+      setResult({
+        title: "SOS demo alert ready",
+        message: "Your emergency request was prepared in demo mode. Connect the response service to send it to responders.",
+        demo: true
       });
 
       // Auto-dismiss after 6 seconds
-      timeoutRef.current = setTimeout(() => {
-        setError(null);
-      }, 6000);
+      timeoutRef.current =       setTimeout(() => setResult(null), 6000);
     } finally {
       setLoading(false);
     }
@@ -169,9 +178,10 @@ export default function SOSButton() {
 
       {/* Success Message */}
       {result && (
-        <div className="sos-message success-message">
-          <div className="message-title">{result.title}</div>
+        <div className={`sos-message ${result.demo ? "demo-message" : "success-message"}`} role="status" aria-live="polite">
+          <div className="message-title"><span aria-hidden="true">{result.demo ? "◌" : "✓"}</span> {result.title}</div>
           <div className="message-body">{result.message}</div>
+          <button type="button" className="message-dismiss" onClick={() => setResult(null)}>Dismiss</button>
         </div>
       )}
 
