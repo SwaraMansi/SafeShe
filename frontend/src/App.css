@@ -1,4 +1,6 @@
 :root {
+  --font-body: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Rajdhani", "Space Grotesk", sans-serif;
   --ink: #172238;
   --muted: #65708a;
   --purple: #6556d9;
@@ -16,7 +18,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: #f7f7fb;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -130,8 +132,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: #fff;
   font-size: 30px;
 }
-.app-header h1 { margin: 0; font-size: 2rem; letter-spacing: -.04em; }
-.eyebrow { margin: 0 0 6px; color: #8f88ed; font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.app-header h1 { margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: .015em; line-height: .95; }
+.eyebrow { margin: 0 0 6px; color: #8f88ed; font-family: var(--font-display); font-size: clamp(.68rem, 1vw, .78rem); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .app-header .eyebrow { color: #cbc7ff; }
 .app-tagline { margin: 3px 0 0; color: #dedbff; }
 .header-status { margin-left: auto; color: #e8e6ff; font-size: .85rem; }
@@ -166,7 +168,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .hero-copy { max-width: 570px; }
 .hero-copy .eyebrow { color: #b8b2ff; }
-.hero-section h2 { margin: 0 0 13px; font-size: clamp(2.15rem, 4.5vw, 3.55rem); line-height: 1.06; letter-spacing: -.05em; }
+.hero-section h2 { margin: 0 0 13px; font-family: var(--font-display); font-size: clamp(2.45rem, 5.2vw, 4.35rem); font-weight: 700; line-height: .98; letter-spacing: .005em; }
 .hero-section p:not(.eyebrow) { margin: 0; color: #d8d5ff; font-size: 1.08rem; line-height: 1.6; }
 
 .sos-container { width: min(100%, 390px); text-align: left; }
@@ -190,7 +192,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sos-button-ring { display: grid; place-items: center; width: 52px; height: 52px; border: 6px solid rgba(255,255,255,.2); border-radius: 50%; background: rgba(123, 18, 45, .35); }
 .sos-icon { display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid rgba(255,255,255,.8); border-radius: 50%; font-size: 1.15rem; font-weight: 800; }
 .sos-button-copy { display: grid; gap: 4px; }
-.sos-button-copy strong { font-size: 1.18rem; }
+.sos-button-copy strong { font-family: var(--font-display); font-size: clamp(1.2rem, 2vw, 1.45rem); letter-spacing: .02em; }
 .sos-button-copy small { color: #ffdbe2; font-size: .72rem; }
 .sos-arrow { margin-left: auto; font-size: 1.4rem; }
 .loading-spinner { display: inline-block; width: 17px; height: 17px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -228,7 +230,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .stat-card:nth-child(3) { min-height: 74px; }
 .stat-card:nth-child(4) { min-height: 90px; transform: translateY(-3px); }
 .stat-card:nth-child(4):hover { transform: translateY(-8px); }
-.stat-card h3 { margin: 0 0 3px; color: var(--ink); font-size: 1.18rem; }
+.stat-card h3 { margin: 0 0 3px; color: var(--ink); font-family: var(--font-display); font-size: clamp(1.25rem, 2vw, 1.55rem); line-height: 1; letter-spacing: .02em; }
 .stat-card p { margin: 0; color: var(--muted); font-size: .8rem; }
 .stat-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: var(--purple); background: #eeecff; font-weight: 800; font-size: 1.2rem; }
 .home-guidance { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -237,11 +239,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .home-guidance > div:nth-child(2) { min-height: 124px; transform: translateY(9px); }
 .home-guidance > div:nth-child(2):hover { transform: translateY(4px); }
 .guidance-number { color: var(--purple); font-size: .75rem; font-weight: 800; }
-.home-guidance h3 { margin: 0 0 4px; font-size: .98rem; }
+.home-guidance h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: clamp(1rem, 1.7vw, 1.15rem); letter-spacing: .02em; }
 .home-guidance p { margin: 0; color: var(--muted); font-size: .87rem; line-height: 1.5; }
 .safety-center { margin-top: 24px; padding: clamp(22px, 4vw, 32px); border: 1px solid rgba(255,255,255,.8); border-radius: 22px; background: rgba(255,255,255,.64); box-shadow: 0 14px 38px rgba(52, 52, 112, .08); backdrop-filter: blur(14px); }
 .safety-center-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
-.safety-center-heading h2 { margin: 0 0 7px; font-size: clamp(1.65rem, 3vw, 2.25rem); line-height: 1.12; letter-spacing: -.045em; }
+.safety-center-heading h2 { margin: 0 0 7px; font-family: var(--font-display); font-size: clamp(1.85rem, 3.4vw, 2.6rem); line-height: 1; letter-spacing: .01em; }
 .safety-center-heading > div > p:last-child { max-width: 620px; margin: 0; color: var(--muted); font-size: clamp(.78rem, 1.4vw, .9rem); line-height: 1.55; }
 .preview-pill { padding: 7px 10px; border: 1px solid #d7d0ff; border-radius: 20px; color: var(--purple-dark); background: #f0eeff; font-size: .68rem; font-weight: 800; white-space: nowrap; }
 .safety-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)); gap: 16px; align-items: stretch; }
@@ -249,7 +251,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .safety-tool-card::after { position: absolute; right: -32px; bottom: -42px; width: 100px; height: 100px; border-radius: 50%; background: rgba(101, 86, 217, .07); content: ""; transition: transform .25s ease; }
 .safety-tool-card:hover { z-index: 1; transform: translateY(-7px) rotate(.35deg); border-color: #cfc8ff; background: rgba(255,255,255,.96); box-shadow: 0 18px 30px rgba(65, 54, 150, .13); }
 .safety-tool-card:hover::after { transform: scale(1.8); }
-.safety-tool-card h3 { margin: 0 0 6px; color: var(--ink); font-size: clamp(.86rem, 1.4vw, .98rem); line-height: 1.25; }
+.safety-tool-card h3 { margin: 0 0 6px; color: var(--ink); font-family: var(--font-display); font-size: clamp(.95rem, 1.5vw, 1.12rem); line-height: 1.1; letter-spacing: .02em; }
 .safety-tool-card p { margin: 0; color: var(--muted); font-size: clamp(.75rem, 1.25vw, .84rem); line-height: 1.55; }
 .safety-tool-card small { display: block; margin-top: 4px; color: var(--purple); font-family: Consolas, monospace; font-size: .62rem; }
 .tool-symbol { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px; color: var(--purple); background: #eeecff; font-size: 1.05rem; font-weight: 800; }
@@ -274,7 +276,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   box-shadow: 0 18px 50px rgba(38, 42, 85, .1), inset 0 1px 0 rgba(255,255,255,.85);
   backdrop-filter: blur(16px);
 }
-.card h2 { margin: 0; font-size: clamp(1.55rem, 3vw, 2.2rem); line-height: 1.12; letter-spacing: -.045em; }
+.card h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.7rem); line-height: 1; letter-spacing: .01em; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .live-badge { padding: 7px 11px; border-radius: 20px; color: #14754f; background: #e8fbf2; font-size: .8rem; font-weight: 800; }
 .demo-badge { color: #8d6515; background: #fff5d8; }
@@ -283,7 +285,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .filter-button:hover, .filter-button.active { color: white; background: var(--purple); }
 .dashboard-container { overflow-x: auto; }
 .dashboard-table { width: 100%; border-collapse: collapse; min-width: 760px; }
-.dashboard-table th { padding: 12px 14px; color: var(--muted); border-bottom: 1px solid var(--line); font-size: .74rem; letter-spacing: .08em; text-align: left; text-transform: uppercase; }
+.dashboard-table th { padding: 12px 14px; color: var(--muted); border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-align: left; text-transform: uppercase; }
 .dashboard-table td { padding: 16px 14px; border-bottom: 1px solid #eff0f5; font-size: .9rem; vertical-align: middle; }
 .dashboard-table tbody tr:hover { background: #fbfaff; }
 .incident-icon { display: inline-block; width: 26px; color: var(--purple); font-size: 1.1rem; }
