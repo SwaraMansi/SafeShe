@@ -34,11 +34,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% -15%, rgba(255, 255, 255, .92), transparent 38%),
-    radial-gradient(circle at 8% 18%, rgba(246, 166, 207, .32), transparent 26rem),
-    radial-gradient(circle at 92% 14%, rgba(129, 211, 255, .32), transparent 24rem),
-    radial-gradient(circle at 78% 82%, rgba(178, 157, 255, .26), transparent 26rem),
-    linear-gradient(180deg, #f1efff 0, #faf9ff 46%, #f5f8ff 100%);
+    linear-gradient(rgba(245, 251, 247, .84), rgba(247, 250, 248, .94)),
+    url("./site-background.jpg") center top / cover fixed no-repeat;
 }
 
 .App::before,
@@ -118,9 +115,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   gap: 16px;
   min-height: 118px;
   padding: 24px max(24px, calc((100% - 1180px) / 2));
-  color: white;
-  background: linear-gradient(110deg, #302b75, #6c5bdd);
-  box-shadow: 0 8px 30px rgba(49, 43, 117, .22);
+  color: #173b2d;
+  background: linear-gradient(110deg, #d5f2e1, #bce6cf);
+  box-shadow: 0 8px 30px rgba(39, 107, 73, .18);
 }
 .brand-mark {
   display: grid;
@@ -134,9 +131,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .app-header h1 { margin: 0; color: #ff6b81; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: .015em; line-height: .95; }
 .eyebrow { margin: 0 0 6px; color: #8f88ed; font-family: var(--font-display); font-size: clamp(.68rem, 1vw, .78rem); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-.app-header .eyebrow { color: #cbc7ff; }
+.app-header .eyebrow { color: #367b59; }
 .app-tagline { margin: 3px 0 0; color: #dedbff; }
-.header-status { margin-left: auto; color: #e8e6ff; font-size: .85rem; }
+.header-status { margin-left: auto; color: #286347; font-size: .85rem; }
 .status-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #6ee7b7; box-shadow: 0 0 0 4px rgba(110,231,183,.14); }
 
 .app-container {
