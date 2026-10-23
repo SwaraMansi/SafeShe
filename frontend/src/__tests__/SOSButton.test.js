@@ -6,7 +6,8 @@ jest.mock('../api');
 
 
 const mockGeolocation = {
-  getCurrentPosition: jest.fn()
+  getCurrentPosition: jest.fn(),
+  watchPosition: jest.fn()
 };
 
 beforeAll(() => {
@@ -24,9 +25,13 @@ test('sends SOS and shows response', async () => {
   render(<SOSButton />);
   fireEvent.click(screen.getByText(/Send SOS/i));
 
-  await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/sos', {
+    latitude: 1,
+    longitude: 2,
+    timestamp: expect.any(String)
+  }));
 
-  expect(screen.getByText(/Risk Score/i)).toBeInTheDocument();
+  expect(screen.getByText(/Emergency alert sent/i)).toBeInTheDocument();
 });
 
 test('handles geolocation failure gracefully', async () => {
@@ -36,7 +41,6 @@ test('handles geolocation failure gracefully', async () => {
   render(<SOSButton />);
   fireEvent.click(screen.getByText(/Send SOS/i));
 
-  await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
-
-  expect(screen.getByText(/Risk Score/i)).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByText(/Unable to get location/i)).toBeInTheDocument());
+  expect(api.post).not.toHaveBeenCalled();
 });

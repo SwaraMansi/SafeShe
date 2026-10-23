@@ -20,10 +20,15 @@ test('submits report without location', async () => {
   api.post.mockResolvedValue({});
   render(<ReportForm />);
 
-  fireEvent.change(screen.getByPlaceholderText(/Describe the incident/i), { target: { value: 'Test incident' } });
+  fireEvent.change(screen.getByPlaceholderText(/Provide details about the incident/i), { target: { value: 'Test incident' } });
+  fireEvent.click(screen.getByLabelText(/Share my location/));
   fireEvent.click(screen.getByText(/Submit Report/i));
 
-  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', { description: 'Test incident', location: null }));
+  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', {
+    description: 'Test incident',
+    category: 'harassment',
+    location: null
+  }));
 });
 
 test('submits report with location when checked', async () => {
@@ -31,9 +36,12 @@ test('submits report with location when checked', async () => {
   api.post.mockResolvedValue({});
 
   render(<ReportForm />);
-  fireEvent.change(screen.getByPlaceholderText(/Describe the incident/i), { target: { value: 'Test incident' } });
-  fireEvent.click(screen.getByLabelText(/Share my location/));
+  fireEvent.change(screen.getByPlaceholderText(/Provide details about the incident/i), { target: { value: 'Test incident' } });
   fireEvent.click(screen.getByText(/Submit Report/i));
 
-  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', { description: 'Test incident', location: { lat: 1, lng: 2 } }));
+  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/report', {
+    description: 'Test incident',
+    category: 'harassment',
+    location: { lat: 1, lng: 2 }
+  }));
 });
