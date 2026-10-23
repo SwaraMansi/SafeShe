@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://<OWNER>/<REPO>",
+  "homepage": "https://swaramansi.github.io/SafeShe/",
   "proxy": "http://localhost:5000",
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
