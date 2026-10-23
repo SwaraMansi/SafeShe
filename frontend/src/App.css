@@ -276,6 +276,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   box-shadow: 0 18px 50px rgba(38, 42, 85, .1), inset 0 1px 0 rgba(255,255,255,.85);
   backdrop-filter: blur(16px);
 }
+.dashboard-card {
+  background:
+    linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.94)),
+    url("./women-background.png") center / cover no-repeat;
+  background-attachment: local;
+}
 .card h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.7rem); line-height: 1; letter-spacing: .01em; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .live-badge { padding: 7px 11px; border-radius: 20px; color: #14754f; background: #e8fbf2; font-size: .8rem; font-weight: 800; }
