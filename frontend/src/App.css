@@ -32,9 +32,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 8% 18%, rgba(246, 166, 207, .34), transparent 26rem),
-    radial-gradient(circle at 92% 14%, rgba(129, 211, 255, .34), transparent 24rem),
-    radial-gradient(circle at 78% 82%, rgba(178, 157, 255, .28), transparent 26rem),
+    radial-gradient(ellipse at 50% -15%, rgba(255, 255, 255, .92), transparent 38%),
+    radial-gradient(circle at 8% 18%, rgba(246, 166, 207, .32), transparent 26rem),
+    radial-gradient(circle at 92% 14%, rgba(129, 211, 255, .32), transparent 24rem),
+    radial-gradient(circle at 78% 82%, rgba(178, 157, 255, .26), transparent 26rem),
     linear-gradient(180deg, #f1efff 0, #faf9ff 46%, #f5f8ff 100%);
 }
 
@@ -50,21 +51,63 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 
 .App::before {
-  top: 420px;
-  left: -150px;
-  width: 360px;
-  height: 360px;
-  background: linear-gradient(145deg, rgba(255, 183, 213, .24), rgba(255, 231, 168, .1));
+  top: 330px;
+  left: -170px;
+  width: 470px;
+  height: 470px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 183, 213, .28), transparent 52%),
+    linear-gradient(145deg, rgba(255, 183, 213, .18), rgba(255, 231, 168, .08));
+  box-shadow:
+    0 0 0 32px rgba(255, 255, 255, .11),
+    0 0 0 64px rgba(255, 255, 255, .06);
   transform: rotate(25deg);
 }
 
 .App::after {
   right: -130px;
-  bottom: 120px;
-  width: 330px;
-  height: 330px;
-  background: linear-gradient(145deg, rgba(133, 220, 255, .2), rgba(177, 158, 255, .18));
+  bottom: 70px;
+  width: 430px;
+  height: 430px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  background:
+    radial-gradient(circle at 60% 40%, rgba(133, 220, 255, .26), transparent 50%),
+    linear-gradient(145deg, rgba(133, 220, 255, .16), rgba(177, 158, 255, .18));
+  box-shadow:
+    0 0 0 28px rgba(255, 255, 255, .1),
+    0 0 0 56px rgba(255, 255, 255, .06);
   transform: rotate(-18deg);
+}
+
+.App > .app-container::before {
+  position: absolute;
+  z-index: -1;
+  top: 190px;
+  right: 8%;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(101, 86, 217, .1);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 22px rgba(101, 86, 217, .035),
+    0 0 0 44px rgba(101, 86, 217, .025);
+  content: "";
+  pointer-events: none;
+}
+
+.App > .app-container::after {
+  position: absolute;
+  z-index: -1;
+  inset: 118px 0 auto;
+  height: 600px;
+  background-image:
+    linear-gradient(rgba(101, 86, 217, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 86, 217, .035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), transparent 82%);
+  content: "";
+  pointer-events: none;
 }
 
 .app-header {
@@ -94,7 +137,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .header-status { margin-left: auto; color: #e8e6ff; font-size: .85rem; }
 .status-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #6ee7b7; box-shadow: 0 0 0 4px rgba(110,231,183,.14); }
 
-.app-container { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 64px; }
+.app-container {
+  position: relative;
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 28px 0 64px;
+}
 .nav-tabs { display: flex; gap: 8px; margin-bottom: 28px; }
 .nav-button, .filter-button {
   border: 1px solid transparent; border-radius: 10px; cursor: pointer; font-weight: 700;
@@ -183,7 +231,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .home-guidance h3 { margin: 0 0 4px; font-size: .98rem; }
 .home-guidance p { margin: 0; color: var(--muted); font-size: .87rem; line-height: 1.5; }
 
-.card { padding: clamp(22px, 4vw, 36px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }
+.card {
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid rgba(255,255,255,.78);
+  border-radius: 20px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 18px 50px rgba(38, 42, 85, .1), inset 0 1px 0 rgba(255,255,255,.85);
+  backdrop-filter: blur(16px);
+}
 .card h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.04em; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .live-badge { padding: 7px 11px; border-radius: 20px; color: #14754f; background: #e8fbf2; font-size: .8rem; font-weight: 800; }
