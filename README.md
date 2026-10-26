@@ -1,6 +1,5 @@
 # 🛡️ SafeShe – AI-Powered Women's Safety & Incident Management Platform
 
-[![Deployments](https://img.shields.io/badge/Deployments-GitHub%20Pages-brightgreen)](https://swaramansi.github.io/SafeShe/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![JavaScript](https://img.shields.io/badge/JavaScript-90.5%25-yellow)](https://github.com/SwaraMansi/SafeShe)
 
